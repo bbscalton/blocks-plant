@@ -81,33 +81,42 @@
             </Grid>
         </Border>
 
-        <!-- Form panel -->
-        <Border Grid.Column="1" Background="{StaticResource RaisedBrush}" Padding="52,44">
+        <!-- Form panel — fixed-width column so labels and fields share one edge -->
+        <Border Grid.Column="1" Background="{StaticResource RaisedBrush}" Padding="48,44">
             <Grid>
-                <StackPanel VerticalAlignment="Center" MaxWidth="360" HorizontalAlignment="Stretch">
+                <StackPanel VerticalAlignment="Center" Width="320" HorizontalAlignment="Center">
                     <TextBlock Text="Sign in" FontFamily="{StaticResource DisplayFont}"
                                FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}"/>
                     <TextBlock Text="Use your plant account to open the Windows POS."
                                Style="{StaticResource PageSubtitle}" Margin="0,8,0,28"/>
 
-                    <TextBlock Text="Username" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="UsernameBox" Height="44" Margin="0,0,0,14" Text="cashier"/>
+                    <TextBlock Text="Username" Style="{StaticResource FieldLabel}"
+                               HorizontalAlignment="Left"/>
+                    <TextBox x:Name="UsernameBox" Width="320" Height="40" Margin="0,0,0,14"
+                             HorizontalAlignment="Left" Text="cashier"/>
 
-                    <TextBlock Text="Password" Style="{StaticResource FieldLabel}"/>
-                    <PasswordBox x:Name="PasswordBox" Height="44" Margin="0,0,0,14" Padding="10,8"/>
+                    <TextBlock Text="Password" Style="{StaticResource FieldLabel}"
+                               HorizontalAlignment="Left"/>
+                    <PasswordBox x:Name="PasswordBox" Width="320" Height="40" Margin="0,0,0,14"
+                                 HorizontalAlignment="Left"/>
 
-                    <TextBlock Text="API base URL" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="ApiUrlBox" Height="40" FontSize="12" Margin="0,0,0,22"/>
+                    <TextBlock Text="API base URL" Style="{StaticResource FieldLabel}"
+                               HorizontalAlignment="Left"/>
+                    <TextBox x:Name="ApiUrlBox" Width="320" Height="40" FontSize="13" Margin="0,0,0,22"
+                             HorizontalAlignment="Left"/>
 
-                    <Button x:Name="LoginButton" Content="Sign in to POS" Height="48" FontSize="15"
+                    <Button x:Name="LoginButton" Content="Sign in to POS" Width="320" Height="48" FontSize="15"
+                            HorizontalAlignment="Left"
                             Style="{StaticResource PrimaryButton}"
                             Click="LoginButton_Click" IsDefault="True"/>
 
                     <TextBlock x:Name="ErrorText" Foreground="{StaticResource DangerBrush}"
-                               TextWrapping="Wrap" Margin="0,14,0,0" FontSize="13"/>
+                               TextWrapping="Wrap" Margin="0,14,0,0" FontSize="13"
+                               Width="320" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <TextBlock Text="Blocks Plant · Desktop · Dark kiln shell" VerticalAlignment="Bottom"
+                           HorizontalAlignment="Center"
                            Foreground="{StaticResource MutedBrush}" FontSize="11"/>
             </Grid>
         </Border>
