@@ -1,0 +1,33 @@
+<UserControl x:Class="BlocksPlant.Desktop.Views.StockAdjustView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel MaxWidth="480" HorizontalAlignment="Left">
+        <TextBlock Text="Stock adjustment" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,8"/>
+        <TextBlock Text="Owner only. Use positive or negative delta (e.g. -10 for write-off)."
+                   Foreground="#555" Margin="0,0,0,16" TextWrapping="Wrap"/>
+
+        <TextBlock Text="Product"/>
+        <ComboBox x:Name="ProductCombo" Margin="0,4,0,12" DisplayMemberPath="ProductName"/>
+
+        <TextBlock Text="Quantity delta"/>
+        <TextBox x:Name="DeltaBox" Margin="0,4,0,12" Text="0"/>
+
+        <TextBlock Text="Reason (optional)"/>
+        <TextBox x:Name="ReasonBox" Margin="0,4,0,16"/>
+
+        <Button Content="Apply adjustment" Height="40" FontWeight="SemiBold"
+                Background="#3D5A40" Foreground="White" BorderThickness="0"
+                Click="Apply_Click"/>
+        <TextBlock x:Name="StatusText" Margin="0,12,0,0" TextWrapping="Wrap"/>
+
+        <TextBlock Text="Current stock" FontWeight="SemiBold" Margin="0,24,0,8"/>
+        <DataGrid x:Name="StockGrid" Height="220">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="80"/>
+                <DataGridTextColumn Header="Min" Binding="{Binding MinStock}" Width="70"/>
+                <DataGridCheckBoxColumn Header="Low" Binding="{Binding IsLow}" Width="60"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</UserControl>

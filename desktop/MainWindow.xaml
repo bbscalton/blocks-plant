@@ -1,0 +1,27 @@
+﻿<Window x:Class="BlocksPlant.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Blocks Plant"
+        Height="720" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#F7F7F4">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#2C3E2D" Padding="16,10">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Blocks Plant" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="UserLabel" Margin="16,0,0,0" Foreground="#C8D5C9" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button DockPanel.Dock="Right" Content="Sign out" HorizontalAlignment="Right"
+                        Padding="12,6" Background="Transparent" Foreground="White" BorderBrush="#6B7F6C"
+                        Click="Logout_Click"/>
+            </DockPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Left" Width="180" Background="#E8EBE4" Padding="8">
+            <StackPanel x:Name="NavPanel"/>
+        </Border>
+
+        <ContentControl x:Name="ContentHost" Margin="12"/>
+    </DockPanel>
+</Window>

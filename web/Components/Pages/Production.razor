@@ -1,0 +1,97 @@
+@page "/production"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Production — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner">
+    <div class="page-header">
+        <div>
+            <h1>Production history</h1>
+            <p class="muted">Recent production entries (read-only)</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else if (_items.Count == 0)
+    {
+        <p class="muted">No production entries yet.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>When (UTC)</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Rejects</th>
+                        <th>By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in _items)
+                    {
+                        <tr>
+                            <td>@e.Id</td>
+                            <td>@e.CreatedAt.ToString("g")</td>
+                            <td>@e.ProductName</td>
+                            <td>@e.Quantity</td>
+                            <td>@e.Rejects</td>
+                            <td>@e.CreatedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<ProductionDto> _items = new();
+    private string? _error;
+    private bool _loading = true;
+    private bool _loaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.CanSeeProductionHistory) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = await Api.GetProductionAsync(100);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

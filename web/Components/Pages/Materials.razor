@@ -1,0 +1,372 @@
+@page "/materials"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Materials — Blocks Plant</PageTitle>
+
+<AuthorizeView>
+    <div class="page-header">
+        <div>
+            <h1>Raw materials</h1>
+            <p class="muted">Cement, sand, aggregate and other inputs</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success">@_message</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>On hand</th>
+                        <th>Unit</th>
+                        <th>Min</th>
+                        <th>Status</th>
+                        @if (Auth.CanManageMaterials)
+                        {
+                            <th></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in _items)
+                    {
+                        <tr class="@(m.IsLow ? "row-warn" : null)">
+                            <td>@m.Name</td>
+                            <td>@m.QuantityOnHand.ToString("0.####")</td>
+                            <td>@m.Unit</td>
+                            <td>@m.MinStock.ToString("0.####")</td>
+                            <td>
+                                @if (m.IsLow)
+                                {
+                                    <span class="badge badge-warn">Low</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ok">OK</span>
+                                }
+                            </td>
+                            @if (Auth.CanManageMaterials)
+                            {
+                                <td class="btn-row">
+                                    <button class="btn btn-sm btn-primary" @onclick="() => BeginReceive(m)">Receive</button>
+                                    <button class="btn btn-sm btn-outline" @onclick="() => BeginEdit(m)">Edit</button>
+                                    <button class="btn btn-sm btn-outline" @onclick="() => BeginAdjust(m)">Adjust</button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Auth.CanManageMaterials)
+        {
+            <div class="page-header" style="margin-top:1.5rem">
+                <h2 class="section-title" style="margin:0">Add material</h2>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Name</label>
+                    <InputText class="form-control" @bind-Value="_newName" />
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <InputText class="form-control" @bind-Value="_newUnit" />
+                </div>
+                <div class="form-group">
+                    <label>Initial qty</label>
+                    <InputNumber class="form-control" @bind-Value="_newQty" />
+                </div>
+                <div class="form-group">
+                    <label>Min stock</label>
+                    <InputNumber class="form-control" @bind-Value="_newMin" />
+                </div>
+                <div class="form-group" style="align-self:end">
+                    <button class="btn btn-primary" @onclick="AddAsync" disabled="@_saving">Add</button>
+                </div>
+            </div>
+        }
+    }
+
+    @if (_receiving is not null)
+    {
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2>Receive @_receiving.Name</h2>
+                <p class="muted">Current: @_receiving.QuantityOnHand.ToString("0.####") @_receiving.Unit</p>
+                <div class="form-group">
+                    <label>Quantity received</label>
+                    <InputNumber class="form-control" @bind-Value="_receiveQty" />
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <InputText class="form-control" @bind-Value="_receiveNotes" />
+                </div>
+                @if (!string.IsNullOrEmpty(_modalError))
+                {
+                    <div class="alert alert-danger">@_modalError</div>
+                }
+                <div class="btn-row">
+                    <button class="btn btn-outline" @onclick="() => _receiving = null">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SaveReceiveAsync" disabled="@_saving">Receive</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (_editing is not null)
+    {
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2>Edit @_editing.Name</h2>
+                <div class="form-group">
+                    <label>Name</label>
+                    <InputText class="form-control" @bind-Value="_editName" />
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <InputText class="form-control" @bind-Value="_editUnit" />
+                </div>
+                <div class="form-group">
+                    <label>Min stock</label>
+                    <InputNumber class="form-control" @bind-Value="_editMin" />
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <InputText class="form-control" @bind-Value="_editNotes" />
+                </div>
+                @if (!string.IsNullOrEmpty(_modalError))
+                {
+                    <div class="alert alert-danger">@_modalError</div>
+                }
+                <div class="btn-row">
+                    <button class="btn btn-outline" @onclick="() => _editing = null">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SaveEditAsync" disabled="@_saving">Save</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (_adjusting is not null)
+    {
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2>Adjust @_adjusting.Name</h2>
+                <p class="muted">Current: @_adjusting.QuantityOnHand.ToString("0.####") @_adjusting.Unit</p>
+                <div class="form-group">
+                    <label>Quantity delta (+/−)</label>
+                    <InputNumber class="form-control" @bind-Value="_adjustDelta" />
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <InputText class="form-control" @bind-Value="_adjustNotes" />
+                </div>
+                @if (!string.IsNullOrEmpty(_modalError))
+                {
+                    <div class="alert alert-danger">@_modalError</div>
+                }
+                <div class="btn-row">
+                    <button class="btn btn-outline" @onclick="() => _adjusting = null">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SaveAdjustAsync" disabled="@_saving">Save</button>
+                </div>
+            </div>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<RawMaterialDto> _items = new();
+    private string? _error;
+    private string? _message;
+    private string? _modalError;
+    private bool _loading = true;
+    private bool _loaded;
+    private bool _saving;
+
+    private string _newName = string.Empty;
+    private string _newUnit = string.Empty;
+    private decimal _newQty;
+    private decimal _newMin;
+
+    private RawMaterialDto? _receiving;
+    private decimal _receiveQty;
+    private string? _receiveNotes;
+
+    private RawMaterialDto? _editing;
+    private string _editName = string.Empty;
+    private string _editUnit = string.Empty;
+    private decimal _editMin;
+    private string? _editNotes;
+
+    private RawMaterialDto? _adjusting;
+    private decimal _adjustDelta;
+    private string? _adjustNotes;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.IsAuthenticated) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = await Api.GetMaterialsAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AddAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_newName) || string.IsNullOrWhiteSpace(_newUnit))
+        {
+            _error = "Name and unit are required.";
+            return;
+        }
+
+        _saving = true;
+        _error = null;
+        _message = null;
+        try
+        {
+            await Api.CreateMaterialAsync(_newName.Trim(), _newUnit.Trim(), _newQty, _newMin, null);
+            _message = "Material added.";
+            _newName = _newUnit = string.Empty;
+            _newQty = _newMin = 0;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void BeginReceive(RawMaterialDto m)
+    {
+        _receiving = m;
+        _receiveQty = 0;
+        _receiveNotes = null;
+        _modalError = null;
+    }
+
+    private void BeginEdit(RawMaterialDto m)
+    {
+        _editing = m;
+        _editName = m.Name;
+        _editUnit = m.Unit;
+        _editMin = m.MinStock;
+        _editNotes = m.Notes;
+        _modalError = null;
+    }
+
+    private void BeginAdjust(RawMaterialDto m)
+    {
+        _adjusting = m;
+        _adjustDelta = 0;
+        _adjustNotes = null;
+        _modalError = null;
+    }
+
+    private async Task SaveReceiveAsync()
+    {
+        if (_receiving is null) return;
+        _saving = true;
+        _modalError = null;
+        try
+        {
+            await Api.ReceiveMaterialAsync(_receiving.Id, _receiveQty, _receiveNotes);
+            _receiving = null;
+            _message = "Stock received.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _modalError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (_editing is null) return;
+        _saving = true;
+        _modalError = null;
+        try
+        {
+            await Api.UpdateMaterialAsync(_editing.Id, _editName, _editUnit, _editMin, _editNotes);
+            _editing = null;
+            _message = "Material updated.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _modalError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task SaveAdjustAsync()
+    {
+        if (_adjusting is null) return;
+        _saving = true;
+        _modalError = null;
+        try
+        {
+            await Api.AdjustMaterialAsync(_adjusting.Id, _adjustDelta, _adjustNotes);
+            _adjusting = null;
+            _message = "Material adjusted.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _modalError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

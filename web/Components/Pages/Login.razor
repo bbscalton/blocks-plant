@@ -1,0 +1,88 @@
+@page "/login"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+@inject Microsoft.Extensions.Options.IOptions<ApiOptions> ApiOptions
+
+<PageTitle>Login — Blocks Plant</PageTitle>
+
+<div class="login-page">
+    <div class="login-card">
+        <h1>Blocks Plant</h1>
+        <p class="muted">Owner dashboard — sign in with your API account</p>
+
+        <EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
+            <div class="form-group">
+                <label>Username</label>
+                <InputText class="form-control" @bind-Value="_model.Username" autocomplete="username" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText type="password" class="form-control" @bind-Value="_model.Password" autocomplete="current-password" />
+            </div>
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <div class="alert alert-danger">@_error</div>
+            }
+            <button class="btn btn-primary w-100" type="submit" disabled="@_busy">
+                @(_busy ? "Signing in…" : "Sign in")
+            </button>
+        </EditForm>
+
+        <p class="api-hint muted">API: @ApiOptions.Value.BaseUrl</p>
+    </div>
+</div>
+
+@code {
+    private readonly LoginRequest _model = new();
+    private string? _error;
+    private bool _busy;
+    private bool _initialized;
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialized) return;
+        _initialized = true;
+        await Auth.InitializeAsync();
+        if (Auth.IsAuthenticated)
+        {
+            Nav.NavigateTo(GetSafeReturn());
+        }
+    }
+
+    private async Task HandleLoginAsync()
+    {
+        _error = null;
+        _busy = true;
+        try
+        {
+            var result = await Api.LoginAsync(_model.Username.Trim(), _model.Password);
+            await Auth.SetUserAsync(result);
+            Nav.NavigateTo(GetSafeReturn());
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Cannot reach API at {ApiOptions.Value.BaseUrl}. {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private string GetSafeReturn()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl) || !ReturnUrl.StartsWith('/') || ReturnUrl.StartsWith("//"))
+            return Auth.CanSeeDashboard ? "/" : "/stock";
+        return ReturnUrl;
+    }
+}

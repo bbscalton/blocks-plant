@@ -1,0 +1,170 @@
+@page "/stock"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Stock — Blocks Plant</PageTitle>
+
+<AuthorizeView>
+    <div class="page-header">
+        <div>
+            <h1>Stock</h1>
+            <p class="muted">Current block inventory</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Size</th>
+                        <th>Quantity</th>
+                        <th>Min stock</th>
+                        <th>Status</th>
+                        @if (Auth.CanManageStock)
+                        {
+                            <th>Adjust</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in _items)
+                    {
+                        <tr class="@(s.IsLow ? "row-warn" : null)">
+                            <td>@s.ProductName</td>
+                            <td>@s.SizeInches"</td>
+                            <td>@s.Quantity</td>
+                            <td>@s.MinStock</td>
+                            <td>
+                                @if (s.IsLow)
+                                {
+                                    <span class="badge badge-warn">Low</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ok">OK</span>
+                                }
+                            </td>
+                            @if (Auth.CanManageStock)
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-outline" @onclick="() => BeginAdjust(s)">Adjust</button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (_adjusting is not null)
+    {
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2>Adjust @_adjusting.ProductName</h2>
+                <p class="muted">Current qty: @_adjusting.Quantity</p>
+                <div class="form-group">
+                    <label>Quantity delta (+/−)</label>
+                    <InputNumber class="form-control" @bind-Value="_delta" />
+                </div>
+                <div class="form-group">
+                    <label>Reason (optional)</label>
+                    <InputText class="form-control" @bind-Value="_reason" />
+                </div>
+                @if (!string.IsNullOrEmpty(_adjustError))
+                {
+                    <div class="alert alert-danger">@_adjustError</div>
+                }
+                <div class="btn-row">
+                    <button class="btn btn-outline" @onclick="() => _adjusting = null">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SaveAdjustAsync" disabled="@_saving">Save</button>
+                </div>
+            </div>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<StockDto> _items = new();
+    private string? _error;
+    private bool _loading = true;
+    private bool _loaded;
+    private StockDto? _adjusting;
+    private int _delta;
+    private string? _reason;
+    private string? _adjustError;
+    private bool _saving;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.IsAuthenticated) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = await Api.GetStockAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void BeginAdjust(StockDto s)
+    {
+        _adjusting = s;
+        _delta = 0;
+        _reason = null;
+        _adjustError = null;
+    }
+
+    private async Task SaveAdjustAsync()
+    {
+        if (_adjusting is null) return;
+        _saving = true;
+        _adjustError = null;
+        try
+        {
+            await Api.AdjustStockAsync(_adjusting.ProductId, _delta, _reason);
+            _adjusting = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _adjustError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

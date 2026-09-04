@@ -1,0 +1,25 @@
+<UserControl x:Class="BlocksPlant.Desktop.Views.DeliveriesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Pending deliveries" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Refresh" Margin="0,0,8,0" Click="Refresh_Click"/>
+                <Button Content="Mark delivered" Background="#3D5A40" Foreground="White" BorderThickness="0"
+                        Click="MarkDelivered_Click"/>
+            </StackPanel>
+        </DockPanel>
+        <TextBlock x:Name="StatusText" DockPanel.Dock="Bottom" Margin="0,8,0,0"/>
+        <DataGrid x:Name="Grid" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Sale #" Binding="{Binding SaleId}" Width="70"/>
+                <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*"/>
+                <DataGridTextColumn Header="Address" Binding="{Binding DeliveryAddress}" Width="2*"/>
+                <DataGridTextColumn Header="Notes" Binding="{Binding DeliveryNotes}" Width="*"/>
+                <DataGridTextColumn Header="Total" Binding="{Binding Subtotal, StringFormat=C}" Width="90"/>
+                <DataGridTextColumn Header="When" Binding="{Binding CreatedAt, StringFormat=g}" Width="140"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

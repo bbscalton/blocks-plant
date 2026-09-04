@@ -1,0 +1,170 @@
+@page "/"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<PageTitle>Dashboard — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner">
+    <h1>Dashboard</h1>
+    <p class="muted">Today’s operations snapshot</p>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+    else if (_loading)
+    {
+        <p>Loading…</p>
+    }
+    else if (_dash is not null)
+    {
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-label">Today’s sales</div>
+                <div class="stat-value">@_dash.TodaySalesTotal.ToString("C")</div>
+                <div class="stat-sub">@_dash.TodaySalesCount sale(s)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cash collected today</div>
+                <div class="stat-value">@_todayCash.ToString("C")</div>
+                <div class="stat-sub">Credit issued @_todayCredit.ToString("C")</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Today’s production</div>
+                <div class="stat-value">@_dash.TodayProductionQty.ToString("N0")</div>
+                <div class="stat-sub">blocks</div>
+            </div>
+            <div class="stat-card warn">
+                <div class="stat-label">Total unpaid</div>
+                <div class="stat-value">@_dash.TotalUnpaid.ToString("C")</div>
+                <div class="stat-sub">@_dash.DebtorCount debtor(s)</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Finished goods stock</h2>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Size</th>
+                        <th>Qty</th>
+                        <th>Min</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in _dash.Stock)
+                    {
+                        <tr class="@(s.IsLow ? "row-warn" : null)">
+                            <td>@s.ProductName</td>
+                            <td>@s.SizeInches"</td>
+                            <td>@s.Quantity</td>
+                            <td>@s.MinStock</td>
+                            <td>
+                                @if (s.IsLow)
+                                {
+                                    <span class="badge badge-warn">Low stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ok">OK</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title">Raw materials</h2>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>On hand</th>
+                        <th>Unit</th>
+                        <th>Min</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in _dash.Materials)
+                    {
+                        <tr class="@(m.IsLow ? "row-warn" : null)">
+                            <td>@m.Name</td>
+                            <td>@m.QuantityOnHand.ToString("0.####")</td>
+                            <td>@m.Unit</td>
+                            <td>@m.MinStock.ToString("0.####")</td>
+                            <td>
+                                @if (m.IsLow)
+                                {
+                                    <span class="badge badge-warn">Low stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ok">OK</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private DashboardDto? _dash;
+    private decimal _todayCash;
+    private decimal _todayCredit;
+    private string? _error;
+    private bool _loading = true;
+    private bool _loaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+
+        if (!Auth.IsAuthenticated)
+            await Auth.InitializeAsync();
+
+        if (Auth.IsAuthenticated && !Auth.IsOwner)
+        {
+            Nav.NavigateTo(Auth.CanSeeMoney ? "/sales" : "/stock");
+            return;
+        }
+
+        if (!Auth.IsOwner)
+        {
+            _loading = false;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            _dash = await Api.GetDashboardAsync();
+            var sales = await Api.GetSalesAsync(200);
+            var today = DateTime.UtcNow.Date;
+            var todaySales = sales.Where(s => s.CreatedAt.ToUniversalTime().Date == today).ToList();
+            _todayCash = todaySales.Sum(s => s.AmountPaid);
+            _todayCredit = todaySales.Sum(s => s.BalanceDue);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

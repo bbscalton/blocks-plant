@@ -1,0 +1,141 @@
+@page "/deliveries"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Deliveries — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner,Cashier">
+    <div class="page-header">
+        <div>
+            <h1>Deliveries</h1>
+            <p class="muted">Pending delivery orders</p>
+        </div>
+        <div class="btn-row">
+            <label class="check-inline">
+                <input type="checkbox" @bind="_includeDelivered" @bind:after="LoadAsync" /> Include delivered
+            </label>
+            <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success">@_message</div>
+    }
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else if (_items.Count == 0)
+    {
+        <p class="muted">No deliveries to show.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Sale #</th>
+                        <th>When (UTC)</th>
+                        <th>Customer</th>
+                        <th>Address</th>
+                        <th>Notes</th>
+                        <th>Subtotal</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in _items)
+                    {
+                        <tr>
+                            <td>@d.SaleId</td>
+                            <td>@d.CreatedAt.ToString("g")</td>
+                            <td>@(d.CustomerName ?? "—")</td>
+                            <td>@(d.DeliveryAddress ?? "—")</td>
+                            <td>@(d.DeliveryNotes ?? "—")</td>
+                            <td>@d.Subtotal.ToString("C")</td>
+                            <td>@d.DeliveryStatus</td>
+                            <td>
+                                @if (string.Equals(d.DeliveryStatus, "Pending", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <button class="btn btn-sm btn-primary" @onclick="() => MarkDeliveredAsync(d)" disabled="@_saving">
+                                        Mark delivered
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<DeliveryDto> _items = new();
+    private bool _includeDelivered;
+    private string? _error;
+    private string? _message;
+    private bool _loading = true;
+    private bool _loaded;
+    private bool _saving;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.CanSeeMoney) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = await Api.GetDeliveriesAsync(_includeDelivered);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task MarkDeliveredAsync(DeliveryDto d)
+    {
+        _saving = true;
+        _error = null;
+        _message = null;
+        try
+        {
+            await Api.UpdateDeliveryStatusAsync(d.SaleId, "Delivered");
+            _message = $"Sale #{d.SaleId} marked delivered.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

@@ -1,0 +1,363 @@
+html, body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2a30;
+    background: #f4f6f8;
+}
+
+a, .btn-link {
+    color: #1f6f63;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1f6f63;
+    border-color: #195a51;
+}
+
+.btn-primary:hover {
+    background-color: #18574e;
+    border-color: #144740;
+}
+
+.btn-outline {
+    background: #fff;
+    border: 1px solid #c5d0d6;
+    color: #334048;
+    border-radius: 6px;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+}
+
+.btn-outline:hover {
+    background: #eef3f5;
+}
+
+.btn-sm {
+    padding: 0.2rem 0.55rem;
+    font-size: 0.82rem;
+}
+
+.btn {
+    border-radius: 6px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.content {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+}
+
+h1 {
+    font-size: 1.55rem;
+    margin: 0 0 0.25rem;
+    font-weight: 650;
+}
+
+h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.75rem;
+}
+
+.muted {
+    color: #6a7a83;
+    margin: 0 0 1rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.section-title {
+    margin-top: 1.75rem;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+    margin: 1rem 0 0.5rem;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #e2e8ee;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+}
+
+.stat-card.warn {
+    border-color: #f0c9a0;
+    background: #fffaf4;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6a7a83;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.stat-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+}
+
+.stat-sub {
+    font-size: 0.82rem;
+    color: #7a8b94;
+    margin-top: 0.2rem;
+}
+
+.table-wrap {
+    background: #fff;
+    border: 1px solid #e2e8ee;
+    border-radius: 10px;
+    overflow: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid #eef2f5;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.data-table th {
+    background: #f7fafb;
+    color: #536169;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.row-warn {
+    background: #fff8f0;
+}
+
+.detail-row td {
+    color: #6a7a83;
+    font-size: 0.82rem;
+    background: #fafbfc;
+    padding-top: 0.2rem;
+    padding-bottom: 0.65rem;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-ok {
+    background: #e7f6ef;
+    color: #1f6f63;
+}
+
+.badge-warn {
+    background: #ffe8cc;
+    color: #9a5b00;
+}
+
+.text-warn {
+    color: #b55b00;
+    font-weight: 600;
+}
+
+.toolbar {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    max-width: 320px;
+}
+
+.check-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: #44545c;
+}
+
+.form-group {
+    margin-bottom: 0.85rem;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+.form-row .form-group {
+    margin-bottom: 0;
+    min-width: 120px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: #44545c;
+}
+
+.form-control {
+    width: 100%;
+    border: 1px solid #c5d0d6;
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.95rem;
+}
+
+.form-control-sm {
+    padding: 0.25rem 0.45rem;
+    font-size: 0.88rem;
+}
+
+.input-narrow {
+    max-width: 110px;
+}
+
+.alert {
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.85rem;
+}
+
+.alert-danger {
+    background: #fdecec;
+    color: #8a1f1f;
+    border: 1px solid #f3c6c6;
+}
+
+.alert-success {
+    background: #e8f6ef;
+    color: #1a5c4d;
+    border: 1px solid #b9e0d0;
+}
+
+.alert-warning {
+    background: #fff6e5;
+    color: #7a5200;
+    border: 1px solid #f0d7a0;
+}
+
+.btn-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 36, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1rem;
+}
+
+.modal-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.25rem 1.35rem;
+    width: min(420px, 100%);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #1a2f38 0%, #2f4a52 45%, #e8eef0 45%);
+    padding: 1.5rem;
+}
+
+.login-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.75rem 1.6rem;
+    width: min(380px, 100%);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+.login-card h1 {
+    margin-bottom: 0.15rem;
+}
+
+.api-hint {
+    margin-top: 1rem;
+    font-size: 0.78rem;
+}
+
+.loading-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6a7a83;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid #e50000;
+}
+
+.validation-message {
+    color: #e50000;
+}
+
+.blazor-error-boundary {
+    background: #b32121;
+    padding: 1rem 1rem 1rem 1rem;
+    color: white;
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred.";
+}

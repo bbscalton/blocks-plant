@@ -1,0 +1,195 @@
+@page "/customers"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Customers — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner,Cashier">
+    <div class="page-header">
+        <div>
+            <h1>Customers / Debtors</h1>
+            <p class="muted">Balances and payments</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    <div class="toolbar">
+        <input class="form-control search-box" placeholder="Search name or phone…" @bind="_search" @bind:event="oninput" />
+        <label class="check-inline">
+            <input type="checkbox" @bind="_debtorsOnly" /> Debtors only
+        </label>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success">@_message</div>
+    }
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Balance</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Filtered)
+                    {
+                        <tr class="@(c.Balance > 0 ? "row-warn" : null)">
+                            <td>@c.Name</td>
+                            <td>@(c.Phone ?? "—")</td>
+                            <td>@(c.Address ?? "—")</td>
+                            <td class="@(c.Balance > 0 ? "text-warn" : null)">@c.Balance.ToString("C")</td>
+                            <td>
+                                @if (c.Balance > 0)
+                                {
+                                    <button class="btn btn-sm btn-primary" @onclick="() => BeginPayment(c)">Record payment</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (_paying is not null)
+    {
+        <div class="modal-backdrop">
+            <div class="modal-card">
+                <h2>Payment — @_paying.Name</h2>
+                <p class="muted">Outstanding: @_paying.Balance.ToString("C")</p>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <InputNumber class="form-control" @bind-Value="_payAmount" />
+                </div>
+                <div class="form-group">
+                    <label>Method</label>
+                    <InputSelect class="form-control" @bind-Value="_payMethod">
+                        <option value="Cash">Cash</option>
+                        <option value="Transfer">Transfer</option>
+                        <option value="Other">Other</option>
+                    </InputSelect>
+                </div>
+                @if (!string.IsNullOrEmpty(_payError))
+                {
+                    <div class="alert alert-danger">@_payError</div>
+                }
+                <div class="btn-row">
+                    <button class="btn btn-outline" @onclick="() => _paying = null">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SavePaymentAsync" disabled="@_saving">Save payment</button>
+                </div>
+            </div>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<CustomerDto> _items = new();
+    private string _search = string.Empty;
+    private bool _debtorsOnly;
+    private string? _error;
+    private string? _message;
+    private bool _loading = true;
+    private bool _loaded;
+    private CustomerDto? _paying;
+    private decimal _payAmount;
+    private string _payMethod = "Cash";
+    private string? _payError;
+    private bool _saving;
+
+    private IEnumerable<CustomerDto> Filtered
+    {
+        get
+        {
+            IEnumerable<CustomerDto> q = _items;
+            if (_debtorsOnly) q = q.Where(c => c.Balance > 0);
+            if (!string.IsNullOrWhiteSpace(_search))
+            {
+                var s = _search.Trim();
+                q = q.Where(c =>
+                    c.Name.Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                    (c.Phone?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+            return q;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.CanSeeMoney) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = string.IsNullOrWhiteSpace(_search)
+                ? await Api.GetCustomersAsync()
+                : await Api.GetCustomersAsync(_search);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void BeginPayment(CustomerDto c)
+    {
+        _paying = c;
+        _payAmount = c.Balance;
+        _payMethod = "Cash";
+        _payError = null;
+        _message = null;
+    }
+
+    private async Task SavePaymentAsync()
+    {
+        if (_paying is null) return;
+        _saving = true;
+        _payError = null;
+        try
+        {
+            await Api.RecordPaymentAsync(_paying.Id, null, _payAmount, _payMethod);
+            _message = $"Recorded {_payAmount:C} for {_paying.Name}.";
+            _paying = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _payError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

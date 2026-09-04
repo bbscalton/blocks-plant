@@ -1,0 +1,130 @@
+@page "/sales"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Sales — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner,Cashier">
+    <div class="page-header">
+        <div>
+            <h1>Sales history</h1>
+            <p class="muted">Recent sales from the POS</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    <div class="toolbar">
+        <input class="form-control search-box" placeholder="Search customer, cashier, id…" @bind="_search" @bind:event="oninput" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>When (UTC)</th>
+                        <th>Customer</th>
+                        <th>Cashier</th>
+                        <th>Type</th>
+                        <th>Subtotal</th>
+                        <th>Paid</th>
+                        <th>Due</th>
+                        <th>Delivery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Filtered)
+                    {
+                        <tr>
+                            <td>@s.Id</td>
+                            <td>@s.CreatedAt.ToString("g")</td>
+                            <td>@(s.CustomerName ?? "—")</td>
+                            <td>@s.CashierName</td>
+                            <td>@s.FulfillmentType</td>
+                            <td>@s.Subtotal.ToString("C")</td>
+                            <td>@s.AmountPaid.ToString("C")</td>
+                            <td class="@(s.BalanceDue > 0 ? "text-warn" : null)">@s.BalanceDue.ToString("C")</td>
+                            <td>@s.DeliveryStatus</td>
+                        </tr>
+                        @if (s.Lines.Count > 0)
+                        {
+                            <tr class="detail-row">
+                                <td colspan="9">
+                                    @string.Join(" · ", s.Lines.Select(l => $"{l.ProductName} ×{l.Quantity}"))
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Filtered.Any())
+        {
+            <p class="muted">No sales match.</p>
+        }
+    }
+</AuthorizeView>
+
+@code {
+    private List<SaleDto> _items = new();
+    private string _search = string.Empty;
+    private string? _error;
+    private bool _loading = true;
+    private bool _loaded;
+
+    private IEnumerable<SaleDto> Filtered
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_search)) return _items;
+            var q = _search.Trim();
+            return _items.Where(s =>
+                s.Id.ToString().Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                (s.CustomerName?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                s.CashierName.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                s.FulfillmentType.Contains(q, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.CanSeeMoney) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = await Api.GetSalesAsync(200);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

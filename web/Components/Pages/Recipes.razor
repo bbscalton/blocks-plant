@@ -1,0 +1,176 @@
+@page "/recipes"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Recipes — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner">
+    <div class="page-header">
+        <div>
+            <h1>Product recipes</h1>
+            <p class="muted">Material consumed per good block produced</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success">@_message</div>
+    }
+
+    @if (_loading && _recipes.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else
+    {
+        <div class="form-group" style="max-width:280px">
+            <label>Product</label>
+            <select class="form-control" value="@_selectedProductId" @onchange="OnProductChanged">
+                @foreach (var r in _recipes)
+                {
+                    <option value="@r.ProductId">@r.ProductName</option>
+                }
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Unit</th>
+                        <th>Qty per block</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _editRows)
+                    {
+                        <tr>
+                            <td>@row.Name</td>
+                            <td>@row.Unit</td>
+                            <td>
+                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="row.QuantityPerBlock" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="btn-row" style="margin-top:1rem">
+            <button class="btn btn-primary" @onclick="SaveAsync" disabled="@_saving">Save recipe</button>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<ProductRecipeDto> _recipes = new();
+    private List<EditRow> _editRows = new();
+    private int _selectedProductId;
+    private string? _error;
+    private string? _message;
+    private bool _loading = true;
+    private bool _loaded;
+    private bool _saving;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.IsOwner) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _recipes = await Api.GetRecipesAsync();
+            var materials = await Api.GetMaterialsAsync();
+            if (_selectedProductId == 0 && _recipes.Count > 0)
+                _selectedProductId = _recipes[0].ProductId;
+            BuildRows(materials);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnProductChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+            _selectedProductId = id;
+        try
+        {
+            var materials = await Api.GetMaterialsAsync();
+            BuildRows(materials);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void BuildRows(List<RawMaterialDto> materials)
+    {
+        var recipe = _recipes.FirstOrDefault(r => r.ProductId == _selectedProductId);
+        var byId = recipe?.Lines.ToDictionary(l => l.RawMaterialId) ?? new();
+        _editRows = materials.OrderBy(m => m.Name).Select(m => new EditRow
+        {
+            RawMaterialId = m.Id,
+            Name = m.Name,
+            Unit = m.Unit,
+            QuantityPerBlock = byId.TryGetValue(m.Id, out var line) ? line.QuantityPerBlock : 0
+        }).ToList();
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        _error = null;
+        _message = null;
+        try
+        {
+            var lines = _editRows
+                .Where(r => r.QuantityPerBlock > 0)
+                .Select(r => (object)new { rawMaterialId = r.RawMaterialId, quantityPerBlock = r.QuantityPerBlock })
+                .ToList();
+            var saved = await Api.SetRecipeAsync(_selectedProductId, lines);
+            _message = $"Saved recipe for {saved.ProductName}.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private sealed class EditRow
+    {
+        public int RawMaterialId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty;
+        public decimal QuantityPerBlock { get; set; }
+    }
+}

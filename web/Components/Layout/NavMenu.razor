@@ -1,0 +1,70 @@
+﻿@using BlocksPlant.Web.Services
+@inject AuthService Auth
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Blocks Plant</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        @if (Auth.CanSeeDashboard)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Dashboard</NavLink>
+            </div>
+        }
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="stock">Stock</NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="materials">Materials</NavLink>
+        </div>
+
+        @if (Auth.CanEditRecipes)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="recipes">Recipes</NavLink>
+            </div>
+        }
+
+        @if (Auth.CanEditProducts)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="products">Products</NavLink>
+            </div>
+        }
+
+        @if (Auth.CanSeeMoney)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="sales">Sales</NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="customers">Customers</NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="deliveries">Deliveries</NavLink>
+            </div>
+        }
+
+        @if (Auth.CanSeeProductionHistory)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="production">Production</NavLink>
+            </div>
+        }
+
+        @if (Auth.IsOperator)
+        {
+            <div class="nav-item px-3">
+                <div class="nav-hint">Operator access is limited on the web. Use the desktop app for production entry.</div>
+            </div>
+        }
+    </nav>
+</div>

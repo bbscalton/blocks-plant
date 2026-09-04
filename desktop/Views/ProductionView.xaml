@@ -1,0 +1,31 @@
+<UserControl x:Class="BlocksPlant.Desktop.Views.ProductionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel MaxWidth="480" HorizontalAlignment="Left">
+        <TextBlock Text="Production entry" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,8"/>
+        <TextBlock Text="Record good blocks produced. This increases stock. No prices shown."
+                   Foreground="#555" Margin="0,0,0,16" TextWrapping="Wrap"/>
+
+        <TextBlock Text="Product"/>
+        <ComboBox x:Name="ProductCombo" Margin="0,4,0,12" DisplayMemberPath="Name"/>
+
+        <TextBlock Text="Quantity produced"/>
+        <TextBox x:Name="QtyBox" Margin="0,4,0,12" Text="0"/>
+
+        <TextBlock Text="Rejects (optional)"/>
+        <TextBox x:Name="RejectsBox" Margin="0,4,0,16" Text="0"/>
+
+        <Button Content="Submit production" Height="40" FontWeight="SemiBold"
+                Background="#3D5A40" Foreground="White" BorderThickness="0"
+                Click="Submit_Click"/>
+        <TextBlock x:Name="StatusText" Margin="0,12,0,0" TextWrapping="Wrap"/>
+
+        <TextBlock Text="Current stock" FontWeight="SemiBold" Margin="0,24,0,8"/>
+        <DataGrid x:Name="StockGrid" Height="200">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="80"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</UserControl>

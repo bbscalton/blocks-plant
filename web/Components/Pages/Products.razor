@@ -1,0 +1,135 @@
+@page "/products"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@inject ApiClient Api
+@inject AuthService Auth
+
+<PageTitle>Products — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner">
+    <div class="page-header">
+        <div>
+            <h1>Products</h1>
+            <p class="muted">Prices and minimum stock levels</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success">@_message</div>
+    }
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _items.Count == 0)
+    {
+        <p>Loading…</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Size</th>
+                        <th>On hand</th>
+                        <th>Price / block</th>
+                        <th>Min stock</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in _items)
+                    {
+                        <tr>
+                            <td>@p.Name</td>
+                            <td>@p.SizeInches"</td>
+                            <td>@p.Quantity</td>
+                            <td>
+                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="_prices[p.Id]" />
+                            </td>
+                            <td>
+                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="_mins[p.Id]" />
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" @onclick="() => SaveAsync(p)" disabled="@_saving">Save</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private List<ProductDto> _items = new();
+    private readonly Dictionary<int, decimal> _prices = new();
+    private readonly Dictionary<int, int> _mins = new();
+    private string? _error;
+    private string? _message;
+    private bool _loading = true;
+    private bool _loaded;
+    private bool _saving;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+        if (Auth.IsOwner) await LoadAsync();
+        else { _loading = false; StateHasChanged(); }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _items = await Api.GetProductsAsync();
+            _prices.Clear();
+            _mins.Clear();
+            foreach (var p in _items)
+            {
+                _prices[p.Id] = p.PricePerBlock ?? 0;
+                _mins[p.Id] = p.MinStock;
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveAsync(ProductDto p)
+    {
+        _saving = true;
+        _error = null;
+        _message = null;
+        try
+        {
+            await Api.UpdateProductAsync(p.Id, _prices[p.Id], _mins[p.Id]);
+            _message = $"Updated {p.Name}.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

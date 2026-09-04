@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Blocks Plant — concrete block plant management: POS, production, materials, stock, and debtors across Windows, Web, and Android." />
+  <title>Blocks Plant — Plant operations software</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- Project Pages: keep relative asset paths. If the site is served from a custom domain root, you can set <base href="/"> instead. -->
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand-mark" href="#top">Blocks Plant</a>
+    <nav class="nav" aria-label="Page">
+      <a href="#problems">Problems</a>
+      <a href="#platforms">Platforms</a>
+      <a href="#roles">Roles</a>
+      <a href="#try">Try it</a>
+    </nav>
+    <a class="btn btn-small" href="#try">Run locally</a>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Concrete block plant software</p>
+        <h1>Blocks Plant</h1>
+        <p class="lede">
+          One system for the yard, the counter, and the office — finished stock,
+          raw materials, production, cash &amp; credit sales, and who still owes you.
+        </p>
+        <div class="cta-row">
+          <a class="btn" href="#problems">See what it solves</a>
+          <a class="btn btn-ghost" href="#try">Try it on your machine</a>
+        </div>
+        <p class="hero-note">
+          This page is a product showcase. The live API, Windows POS, web dashboard,
+          and Android floor app run locally from the repository — not on GitHub Pages.
+        </p>
+      </div>
+      <aside class="hero-panel" aria-label="Sample plant snapshot">
+        <div class="panel-label">Today on the floor</div>
+        <ul class="snapshot" id="stock-snapshot">
+          <li><span>4″ blocks</span><strong data-stock="4">1,240</strong></li>
+          <li><span>6″ blocks</span><strong data-stock="6">860</strong></li>
+          <li><span>8″ blocks</span><strong data-stock="8">410</strong></li>
+          <li class="warn"><span>Cement on hand</span><strong data-mat="cement">18 bags</strong></li>
+        </ul>
+        <p class="panel-hint">Illustrative numbers — interactive demo below.</p>
+      </aside>
+    </section>
+
+    <section id="problems" class="section">
+      <div class="section-head">
+        <h2>What plant owners need under control</h2>
+        <p>Blocks Plant is built around the daily frictions of a block yard — not generic inventory software.</p>
+      </div>
+      <div class="problem-grid">
+        <article>
+          <h3>Stockouts at the counter</h3>
+          <p>Cashiers sell only what you have. Finished stock won’t go negative; low-stock signals keep 4″ / 6″ / 8″ visible before a rush empties a size.</p>
+        </article>
+        <article>
+          <h3>Production you can’t see</h3>
+          <p>Operators log good output from Windows or Android. Owners see today’s production and history without chasing the floor for numbers.</p>
+        </article>
+        <article>
+          <h3>Materials running low</h3>
+          <p>Cement, sand, aggregate, and water sit in materials inventory. Recipes (BOM) deduct raw stock when production posts — shortages are blocked with a clear error.</p>
+        </article>
+        <article>
+          <h3>Unpaid customers</h3>
+          <p>Cash, partial, or credit sales with customer balances. Debtors list and payment recording keep credit customers from disappearing into notebooks.</p>
+        </article>
+        <article>
+          <h3>A real cashier POS</h3>
+          <p>Windows desktop POS for the counter: lines, cash/credit, collect or deliver, receipts. Android offers a networked backup POS when needed.</p>
+        </article>
+        <article>
+          <h3>The right people see the right screens</h3>
+          <p>Owner, Cashier, and Operator roles limit prices, sales, recipes, and stock adjusts so floor staff aren’t exposed to office data.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="manages" class="section section-band">
+      <div class="section-head">
+        <h2>What it manages</h2>
+        <p>Products, materials, production, sales, customers, and deliveries — one API behind every client.</p>
+      </div>
+      <ul class="feature-strip">
+        <li><strong>Products</strong> 4″ / 6″ / 8″ priced per block</li>
+        <li><strong>POS</strong> Cash, partial, or credit</li>
+        <li><strong>Production</strong> Good qty in; stock &amp; materials update</li>
+        <li><strong>Materials + recipes</strong> Receive, adjust, BOM per size</li>
+        <li><strong>Finished stock</strong> Adjust + min-stock alerts</li>
+        <li><strong>Debtors</strong> Balances, payments, deliveries</li>
+      </ul>
+    </section>
+
+    <section id="platforms" class="section">
+      <div class="section-head">
+        <h2>Platforms that match the plant</h2>
+        <p>Same business rules on every surface — Windows at the counter, web in the office, Android on the floor.</p>
+      </div>
+      <div class="platform-grid">
+        <article>
+          <p class="plat-tag">Windows</p>
+          <h3>Desktop POS</h3>
+          <p>Primary cashier station: sales, production entry, customers, materials, recipes, and owner tools.</p>
+        </article>
+        <article>
+          <p class="plat-tag">Web</p>
+          <h3>Owner dashboard</h3>
+          <p>Low finished stock and low materials, today’s sales/production, debtors, recipes, and history in the browser.</p>
+        </article>
+        <article>
+          <p class="plat-tag">Android</p>
+          <h3>Floor app</h3>
+          <p>Offline-first production queue with sync when the network returns. Stock and materials at a glance for operators.</p>
+        </article>
+        <article>
+          <p class="plat-tag">API</p>
+          <h3>Shared backend</h3>
+          <p>ASP.NET Core + SQLite enforces stock, materials, roles, and idempotent sales/production across all clients.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="demo" class="section section-band">
+      <div class="section-head">
+        <h2>Quick feel for the counter &amp; yard</h2>
+        <p>Mock demos only — no server. Useful to show stakeholders how quantities and tickets behave.</p>
+      </div>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Sample POS total</h3>
+          <p class="demo-sub">Pick a size and quantity. Price is illustrative.</p>
+          <form id="pos-form" class="demo-form">
+            <label>
+              Block size
+              <select id="pos-size">
+                <option value="2.50" data-label="4″">4″ — $2.50 / block</option>
+                <option value="3.25" data-label="6″" selected>6″ — $3.25 / block</option>
+                <option value="4.00" data-label="8″">8″ — $4.00 / block</option>
+              </select>
+            </label>
+            <label>
+              Quantity
+              <input id="pos-qty" type="number" min="1" max="5000" value="120" />
+            </label>
+            <p class="pos-total">Ticket total <strong id="pos-total">$390.00</strong></p>
+          </form>
+        </div>
+        <div class="demo-card">
+          <h3>Mock stock pulse</h3>
+          <p class="demo-sub">Simulate a small production batch or a counter sale.</p>
+          <div class="pulse-actions">
+            <button type="button" class="btn btn-small" id="btn-produce">+80 of 4″ (produce)</button>
+            <button type="button" class="btn btn-small btn-ghost" id="btn-sell">−40 of 6″ (sale)</button>
+            <button type="button" class="btn btn-small btn-ghost" id="btn-reset">Reset</button>
+          </div>
+          <p class="pulse-msg" id="pulse-msg" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="roles" class="section">
+      <div class="section-head">
+        <h2>Roles for owner, cashier, and operator</h2>
+        <p>Everyone signs in with a role. The API hides or blocks what that role should not touch.</p>
+      </div>
+      <div class="role-grid">
+        <article>
+          <h3>Owner</h3>
+          <p>Full plant view: dashboard, prices, stock &amp; materials adjusts, recipes, production history, POS, debtors.</p>
+        </article>
+        <article>
+          <h3>Cashier</h3>
+          <p>Counter work: POS, customers, payments, sales history, deliveries. Can view materials; cannot rewrite stock or recipes.</p>
+        </article>
+        <article>
+          <h3>Operator</h3>
+          <p>Floor production entry and quantity views for finished stock and raw materials. No prices, sales, or balances.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="stack" class="section section-band">
+      <div class="section-head">
+        <h2>Tech stack</h2>
+        <p>Built as a multi-client plant system on a single .NET API.</p>
+      </div>
+      <ul class="stack-list">
+        <li><strong>API</strong> ASP.NET Core 8 · EF Core · SQLite</li>
+        <li><strong>Windows POS</strong> WPF · .NET 8</li>
+        <li><strong>Web dashboard</strong> Blazor Server · .NET 8</li>
+        <li><strong>Android</strong> Kotlin · Jetpack Compose · Room offline queue</li>
+      </ul>
+    </section>
+
+    <section id="try" class="section">
+      <div class="section-head">
+        <h2>Try Blocks Plant on your machine</h2>
+        <p>
+          GitHub Pages hosts this showcase only. To evaluate the real POS, dashboard, and floor app,
+          clone the repo and run the API plus the clients you care about.
+        </p>
+      </div>
+      <ol class="try-steps">
+        <li>Start the API: <code>cd backend</code> then <code>dotnet run --launch-profile http</code></li>
+        <li>Windows POS: <code>cd desktop</code> then <code>dotnet run</code></li>
+        <li>Web dashboard: <code>cd web</code> then <code>dotnet run --launch-profile http</code></li>
+        <li>Android: open <code>android/</code> in Android Studio (or build the debug APK)</li>
+      </ol>
+      <p class="try-accounts">
+        Seeded sign-in: <code>owner</code> / <code>owner123</code>,
+        <code>cashier</code> / <code>cashier123</code>,
+        <code>operator</code> / <code>operator123</code>
+      </p>
+      <div class="cta-row">
+        <a class="btn" id="repo-link" href="https://github.com/" rel="noopener">Open the repository</a>
+        <a class="btn btn-ghost" href="https://github.com/" id="readme-link" rel="noopener">Full setup in README</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p><strong>Blocks Plant</strong> — plant operations software for concrete block yards.</p>
+    <p class="foot-note">Static product page · full system runs from the repository locally.</p>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>

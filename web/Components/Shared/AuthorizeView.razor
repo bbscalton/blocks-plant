@@ -1,0 +1,56 @@
+@using BlocksPlant.Web.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+@if (_checked && !Auth.IsAuthenticated)
+{
+    // redirect handled in OnInitialized
+}
+else if (_checked && _roles.Length > 0 && !Auth.HasAnyRole(_roles))
+{
+    <div class="alert alert-warning">
+        You do not have access to this page (@string.Join(", ", _roles) required).
+        <a href="@FallbackHref">Go back</a>
+    </div>
+}
+else if (_checked)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Roles { get; set; } = string.Empty;
+    [Parameter] public string FallbackHref { get; set; } = "/";
+    [Parameter] public bool RequireAuth { get; set; } = true;
+
+    private string[] _roles = Array.Empty<string>();
+    private bool _checked;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _checked) return;
+
+        if (!Auth.IsAuthenticated)
+            await Auth.InitializeAsync();
+
+        _roles = string.IsNullOrWhiteSpace(Roles)
+            ? Array.Empty<string>()
+            : Roles.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        _checked = true;
+
+        if (RequireAuth && !Auth.IsAuthenticated)
+        {
+            Nav.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(Nav.ToBaseRelativePath(Nav.Uri))}");
+            return;
+        }
+
+        if (_roles.Length > 0 && Auth.IsAuthenticated && !Auth.HasAnyRole(_roles))
+        {
+            // show warning via StateHasChanged
+        }
+
+        StateHasChanged();
+    }
+}
