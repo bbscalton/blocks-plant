@@ -27,7 +27,14 @@
 
     @if (_loading && _items.Count == 0)
     {
-        <p>Loading…</p>
+        <div class="loading-inline"><span class="loading-dot"></span> Loading products…</div>
+    }
+    else if (_items.Count == 0)
+    {
+        <div class="state-panel">
+            <strong>No products yet</strong>
+            Products appear here once the plant catalog is seeded.
+        </div>
     }
     else
     {

@@ -9,30 +9,49 @@
 <PageTitle>Login — Blocks Plant</PageTitle>
 
 <div class="login-page">
-    <div class="login-card">
-        <h1>Blocks Plant</h1>
-        <p class="muted">Owner dashboard — sign in with your API account</p>
-
-        <EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
-            <div class="form-group">
-                <label>Username</label>
-                <InputText class="form-control" @bind-Value="_model.Username" autocomplete="username" />
+    <section class="login-brand">
+        <div class="brand-mark">
+            <div class="brand-mark-icon"><span></span></div>
+            <div>
+                <div class="brand-wordmark">Blocks Plant</div>
+                <div class="brand-tag">Manufacturing · Sales · Stock</div>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <InputText type="password" class="form-control" @bind-Value="_model.Password" autocomplete="current-password" />
-            </div>
-            @if (!string.IsNullOrEmpty(_error))
-            {
-                <div class="alert alert-danger">@_error</div>
-            }
-            <button class="btn btn-primary w-100" type="submit" disabled="@_busy">
-                @(_busy ? "Signing in…" : "Sign in")
-            </button>
-        </EditForm>
+        </div>
+        <h1>Concrete block operations, built for the floor.</h1>
+        <p>Owner dashboard for stock, production, materials, sales, and debtors — the same plant language as the Windows POS.</p>
+        <div class="login-pills">
+            <span>Live inventory</span>
+            <span>Debtors</span>
+            <span>Recipes &amp; BOM</span>
+        </div>
+    </section>
 
-        <p class="api-hint muted">API: @ApiOptions.Value.BaseUrl</p>
-    </div>
+    <section class="login-form-panel">
+        <div class="login-card">
+            <h2>Sign in</h2>
+            <p class="muted">Use your API account to open the owner workspace.</p>
+
+            <EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
+                <div class="form-group">
+                    <label>Username</label>
+                    <InputText class="form-control" @bind-Value="_model.Username" autocomplete="username" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="_model.Password" autocomplete="current-password" />
+                </div>
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+                <button class="btn btn-primary w-100" type="submit" disabled="@_busy">
+                    @(_busy ? "Signing in…" : "Sign in to dashboard")
+                </button>
+            </EditForm>
+
+            <p class="api-hint muted">API: @ApiOptions.Value.BaseUrl</p>
+        </div>
+    </section>
 </div>
 
 @code {

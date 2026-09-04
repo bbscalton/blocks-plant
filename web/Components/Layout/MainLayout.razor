@@ -6,7 +6,10 @@
 
 @if (!_ready)
 {
-    <div class="loading-screen">Loading…</div>
+    <div class="loading-screen">
+        <span class="loading-dot"></span>
+        Loading Blocks Plant…
+    </div>
 }
 else if (!Auth.IsAuthenticated)
 {
@@ -36,7 +39,7 @@ else
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+    <a class="dismiss">×</a>
 </div>
 
 @code {

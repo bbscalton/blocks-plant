@@ -85,7 +85,9 @@ public partial class PosView : UserControl
     private void Recalc()
     {
         var total = _lines.Sum(l => l.LineTotal);
-        GrandTotalText.Text = $"Total: {total:C}";
+        GrandTotalText.Text = total.ToString("C");
+        if (LineCountText is not null)
+            LineCountText.Text = _lines.Count == 1 ? "1 line item" : $"{_lines.Count} line items";
         if (PayFullRadio.IsChecked == true)
             AmountPaidBox.Text = total.ToString("0.00");
         else if (PayCreditRadio.IsChecked == true)

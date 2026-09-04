@@ -32,11 +32,14 @@
 
     @if (_loading && _items.Count == 0)
     {
-        <p>Loading…</p>
+        <div class="loading-inline"><span class="loading-dot"></span> Loading deliveries…</div>
     }
     else if (_items.Count == 0)
     {
-        <p class="muted">No deliveries to show.</p>
+        <div class="state-panel">
+            <strong>No deliveries to show</strong>
+            Pending yard deliveries from the POS will appear here.
+        </div>
     }
     else
     {

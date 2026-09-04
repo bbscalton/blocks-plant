@@ -27,7 +27,7 @@
 
     @if (_loading && _items.Count == 0)
     {
-        <p>Loading…</p>
+        <div class="loading-inline"><span class="loading-dot"></span> Loading sales…</div>
     }
     else
     {
@@ -74,7 +74,10 @@
         </div>
         @if (!Filtered.Any())
         {
-            <p class="muted">No sales match.</p>
+            <div class="state-panel">
+                <strong>No sales match</strong>
+                Try clearing the search or complete a sale from the desktop POS.
+            </div>
         }
     }
 </AuthorizeView>

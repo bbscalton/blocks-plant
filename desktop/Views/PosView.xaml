@@ -4,60 +4,106 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="340"/>
         </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock DockPanel.Dock="Top" Text="Point of Sale" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12"/>
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
-                <ComboBox x:Name="ProductCombo" Width="220" DisplayMemberPath="Name"/>
-                <TextBox x:Name="QtyBox" Width="70" Margin="8,0,0,0" Text="1" VerticalContentAlignment="Center"/>
-                <Button Content="Add" Margin="8,0,0,0" Padding="14,6" Click="AddLine_Click"
-                        Background="#3D5A40" Foreground="White" BorderThickness="0"/>
-            </StackPanel>
-            <DataGrid x:Name="LinesGrid" Margin="0,0,0,8">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
-                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="60"/>
-                    <DataGridTextColumn Header="Unit" Binding="{Binding UnitPrice, StringFormat=C}" Width="80"/>
-                    <DataGridTextColumn Header="Line" Binding="{Binding LineTotal, StringFormat=C}" Width="90"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
+        <!-- Line items -->
+        <Border Grid.Column="0" Style="{StaticResource PanelCard}" Margin="0,0,14,0" Padding="18">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Ticket" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Text="Add products, then complete checkout on the right." Style="{StaticResource PageSubtitle}" Margin="0"/>
+                    </StackPanel>
+                </DockPanel>
 
+                <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" CornerRadius="6"
+                        Padding="12" Margin="0,0,0,12" BorderBrush="{StaticResource BorderBrushKey}" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="88"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Product" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="ProductCombo" DisplayMemberPath="Name" Height="40"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                            <TextBlock Text="Qty" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="QtyBox" Text="1" Height="40" FontSize="16" FontWeight="SemiBold"
+                                     HorizontalContentAlignment="Center"/>
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="Add line" Style="{StaticResource PrimaryButton}"
+                                VerticalAlignment="Bottom" Height="40" Padding="18,0" Click="AddLine_Click"/>
+                    </Grid>
+                </Border>
+
+                <DataGrid x:Name="LinesGrid" BorderThickness="0" HeadersVisibility="Column"
+                          AlternatingRowBackground="#FFF8F9FA" RowHeight="42">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                        <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="70"/>
+                        <DataGridTextColumn Header="Unit" Binding="{Binding UnitPrice, StringFormat=C}" Width="90"/>
+                        <DataGridTextColumn Header="Line" Binding="{Binding LineTotal, StringFormat=C}" Width="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <!-- Checkout rail -->
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock Text="Checkout" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                <TextBlock x:Name="GrandTotalText" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" Text="Total: $0.00"/>
+                <Border Background="{StaticResource SlateBrush}" CornerRadius="8" Padding="18,16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="SALE TOTAL" FontSize="11" FontWeight="Bold" Foreground="#8A9AA3"/>
+                        <TextBlock x:Name="GrandTotalText" Text="$0.00"
+                                   FontFamily="{StaticResource DisplayFont}"
+                                   FontSize="36" FontWeight="Bold" Foreground="White" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="LineCountText" Text="0 line items" FontSize="12" Foreground="#A8B6BD" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
 
-                <TextBlock Text="Fulfillment" FontWeight="SemiBold"/>
-                <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
-                    <RadioButton x:Name="CollectRadio" Content="Collect" IsChecked="True" Checked="Fulfillment_Changed"/>
-                    <RadioButton x:Name="DeliverRadio" Content="Deliver" Margin="16,0,0,0" Checked="Fulfillment_Changed"/>
-                </StackPanel>
-                <TextBox x:Name="DeliveryAddressBox" Margin="0,0,0,6" Visibility="Collapsed"
-                         ToolTip="Delivery address"/>
-                <TextBox x:Name="DeliveryNotesBox" Margin="0,0,0,12" Visibility="Collapsed"
-                         ToolTip="Delivery notes"/>
+                <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="1 · Fulfillment" Style="{StaticResource SectionLabel}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <RadioButton x:Name="CollectRadio" Content="Collect" IsChecked="True"
+                                         Margin="0,0,16,0" Checked="Fulfillment_Changed"/>
+                            <RadioButton x:Name="DeliverRadio" Content="Deliver" Checked="Fulfillment_Changed"/>
+                        </StackPanel>
+                        <TextBox x:Name="DeliveryAddressBox" Margin="0,0,0,6" Visibility="Collapsed"
+                                 ToolTip="Delivery address" Tag="Address"/>
+                        <TextBox x:Name="DeliveryNotesBox" Visibility="Collapsed"
+                                 ToolTip="Delivery notes"/>
+                    </StackPanel>
+                </Border>
 
-                <TextBlock Text="Payment" FontWeight="SemiBold"/>
-                <StackPanel Margin="0,4,0,8">
-                    <RadioButton x:Name="PayFullRadio" Content="Cash (full)" IsChecked="True" Checked="Payment_Changed"/>
-                    <RadioButton x:Name="PayPartialRadio" Content="Partial payment" Checked="Payment_Changed"/>
-                    <RadioButton x:Name="PayCreditRadio" Content="Credit (pay later)" Checked="Payment_Changed"/>
-                </StackPanel>
-                <TextBlock Text="Amount paid"/>
-                <TextBox x:Name="AmountPaidBox" Margin="0,4,0,12" IsEnabled="False"/>
+                <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="2 · Payment" Style="{StaticResource SectionLabel}"/>
+                        <RadioButton x:Name="PayFullRadio" Content="Cash (full)" IsChecked="True" Checked="Payment_Changed"/>
+                        <RadioButton x:Name="PayPartialRadio" Content="Partial payment" Checked="Payment_Changed"/>
+                        <RadioButton x:Name="PayCreditRadio" Content="Credit (pay later)" Checked="Payment_Changed"/>
+                        <TextBlock Text="Amount paid" Style="{StaticResource FieldLabel}" Margin="0,8,0,4"/>
+                        <TextBox x:Name="AmountPaidBox" IsEnabled="False" FontSize="16" FontWeight="SemiBold" Height="40"/>
+                    </StackPanel>
+                </Border>
 
-                <TextBlock Text="Customer" FontWeight="SemiBold"/>
-                <ComboBox x:Name="CustomerCombo" Margin="0,4,0,6" DisplayMemberPath="Name"/>
-                <Button Content="New customer…" Margin="0,0,0,12" Click="NewCustomer_Click"/>
+                <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="3 · Customer" Style="{StaticResource SectionLabel}"/>
+                        <ComboBox x:Name="CustomerCombo" Margin="0,0,0,8" DisplayMemberPath="Name" Height="40"/>
+                        <Button Content="New customer…" Click="NewCustomer_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
 
-                <Button Content="Complete sale" Height="40" FontWeight="SemiBold"
-                        Background="#3D5A40" Foreground="White" BorderThickness="0"
+                <Button Content="Complete sale" Height="48" FontSize="15"
+                        Style="{StaticResource PrimaryButton}"
                         Click="CompleteSale_Click"/>
-                <Button Content="Clear" Margin="0,8,0,0" Click="Clear_Click"/>
-                <TextBlock x:Name="StatusText" TextWrapping="Wrap" Margin="0,12,0,0" Foreground="#335"/>
+                <Button Content="Clear ticket" Margin="0,8,0,0" Click="Clear_Click"/>
+                <TextBlock x:Name="StatusText" TextWrapping="Wrap" Margin="0,12,0,0"
+                           Foreground="{StaticResource MutedBrush}" FontSize="13"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

@@ -9,16 +9,27 @@
 <PageTitle>Dashboard — Blocks Plant</PageTitle>
 
 <AuthorizeView Roles="Owner">
-    <h1>Dashboard</h1>
-    <p class="muted">Today’s operations snapshot</p>
+    <div class="page-header">
+        <div>
+            <h1>Command center</h1>
+            <p class="muted">Today’s production, cash, debtors, and materials at a glance</p>
+        </div>
+    </div>
 
     @if (!string.IsNullOrEmpty(_error))
     {
         <div class="alert alert-danger">@_error</div>
+        <div class="state-panel">
+            <strong>Dashboard unavailable</strong>
+            Check the API connection, then refresh the page.
+        </div>
     }
     else if (_loading)
     {
-        <p>Loading…</p>
+        <div class="loading-inline">
+            <span class="loading-dot"></span>
+            Loading operations snapshot…
+        </div>
     }
     else if (_dash is not null)
     {
@@ -46,76 +57,96 @@
         </div>
 
         <h2 class="section-title">Finished goods stock</h2>
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Size</th>
-                        <th>Qty</th>
-                        <th>Min</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in _dash.Stock)
-                    {
-                        <tr class="@(s.IsLow ? "row-warn" : null)">
-                            <td>@s.ProductName</td>
-                            <td>@s.SizeInches"</td>
-                            <td>@s.Quantity</td>
-                            <td>@s.MinStock</td>
-                            <td>
-                                @if (s.IsLow)
-                                {
-                                    <span class="badge badge-warn">Low stock</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-ok">OK</span>
-                                }
-                            </td>
+        @if (_dash.Stock.Count == 0)
+        {
+            <div class="state-panel">
+                <strong>No finished stock yet</strong>
+                Production entries will appear here once blocks are recorded.
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                            <th>Min</th>
+                            <th>Status</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in _dash.Stock)
+                        {
+                            <tr class="@(s.IsLow ? "row-warn" : null)">
+                                <td>@s.ProductName</td>
+                                <td>@s.SizeInches"</td>
+                                <td>@s.Quantity</td>
+                                <td>@s.MinStock</td>
+                                <td>
+                                    @if (s.IsLow)
+                                    {
+                                        <span class="badge badge-warn">Low stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-ok">OK</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
 
         <h2 class="section-title">Raw materials</h2>
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Material</th>
-                        <th>On hand</th>
-                        <th>Unit</th>
-                        <th>Min</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in _dash.Materials)
-                    {
-                        <tr class="@(m.IsLow ? "row-warn" : null)">
-                            <td>@m.Name</td>
-                            <td>@m.QuantityOnHand.ToString("0.####")</td>
-                            <td>@m.Unit</td>
-                            <td>@m.MinStock.ToString("0.####")</td>
-                            <td>
-                                @if (m.IsLow)
-                                {
-                                    <span class="badge badge-warn">Low stock</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-ok">OK</span>
-                                }
-                            </td>
+        @if (_dash.Materials.Count == 0)
+        {
+            <div class="state-panel">
+                <strong>No materials listed</strong>
+                Add cement, sand, and aggregate from the Materials page.
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>On hand</th>
+                            <th>Unit</th>
+                            <th>Min</th>
+                            <th>Status</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in _dash.Materials)
+                        {
+                            <tr class="@(m.IsLow ? "row-warn" : null)">
+                                <td>@m.Name</td>
+                                <td>@m.QuantityOnHand.ToString("0.####")</td>
+                                <td>@m.Unit</td>
+                                <td>@m.MinStock.ToString("0.####")</td>
+                                <td>
+                                    @if (m.IsLow)
+                                    {
+                                        <span class="badge badge-warn">Low stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-ok">OK</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     }
 </AuthorizeView>
 

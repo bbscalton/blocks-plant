@@ -2,26 +2,81 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Blocks Plant"
-        Height="720" Width="1100"
+        Height="760" Width="1200"
+        MinHeight="640" MinWidth="980"
         WindowStartupLocation="CenterScreen"
-        Background="#F7F7F4">
-    <DockPanel>
-        <Border DockPanel.Dock="Top" Background="#2C3E2D" Padding="16,10">
+        Background="{StaticResource SurfaceBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="228"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="{StaticResource SlateBrush}">
             <DockPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Blocks Plant" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="UserLabel" Margin="16,0,0,0" Foreground="#C8D5C9" VerticalAlignment="Center"/>
-                </StackPanel>
-                <Button DockPanel.Dock="Right" Content="Sign out" HorizontalAlignment="Right"
-                        Padding="12,6" Background="Transparent" Foreground="White" BorderBrush="#6B7F6C"
-                        Click="Logout_Click"/>
+                <Border DockPanel.Dock="Top" Padding="18,20,18,16" BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="34" Height="34" Background="{StaticResource AccentBrush}" CornerRadius="5" Margin="0,0,10,0">
+                            <Grid>
+                                <Border Width="11" Height="6" Background="White" Opacity="0.95" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,7,0,0" CornerRadius="1"/>
+                                <Border Width="11" Height="6" Background="White" Opacity="0.75" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,7,0,0" CornerRadius="1"/>
+                                <Border Width="11" Height="6" Background="White" Opacity="0.85" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11,16,0,0" CornerRadius="1"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="BLOCKS PLANT" FontFamily="{StaticResource DisplayFont}"
+                                       FontSize="13" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="Operations" FontSize="11" Foreground="#8A9AA3"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border DockPanel.Dock="Bottom" Padding="14,12" BorderBrush="#22FFFFFF" BorderThickness="0,1,0,0">
+                    <StackPanel>
+                        <Border Background="#22FFFFFF" CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock x:Name="UserNameLabel" FontWeight="SemiBold" Foreground="White" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                <Border Background="#33E07020" CornerRadius="3" Padding="6,2" Margin="0,6,0,0" HorizontalAlignment="Left">
+                                    <TextBlock x:Name="UserRoleLabel" Foreground="#FFE8C9A8" FontSize="10" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <Button Content="Sign out" Style="{StaticResource GhostButton}"
+                                HorizontalAlignment="Stretch" Click="Logout_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10,14,10,8">
+                    <StackPanel x:Name="NavPanel"/>
+                </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <Border DockPanel.Dock="Left" Width="180" Background="#E8EBE4" Padding="8">
-            <StackPanel x:Name="NavPanel"/>
-        </Border>
+        <!-- Content -->
+        <DockPanel Grid.Column="1">
+            <Border DockPanel.Dock="Top" Background="{StaticResource RaisedBrush}"
+                    BorderBrush="{StaticResource BorderBrushKey}" BorderThickness="0,0,0,1"
+                    Padding="22,14">
+                <DockPanel>
+                    <StackPanel>
+                        <TextBlock x:Name="PageTitleLabel" Text="Workspace"
+                                   FontFamily="{StaticResource DisplayFont}"
+                                   FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}"/>
+                        <TextBlock x:Name="PageHintLabel" Text="Select a module"
+                                   FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Border DockPanel.Dock="Right" Background="{StaticResource AccentSoftBrush}"
+                            CornerRadius="4" Padding="10,6" VerticalAlignment="Center">
+                        <TextBlock Text="Live floor" Foreground="{StaticResource AccentHoverBrush}"
+                                   FontSize="11" FontWeight="SemiBold"/>
+                    </Border>
+                </DockPanel>
+            </Border>
 
-        <ContentControl x:Name="ContentHost" Margin="12"/>
-    </DockPanel>
+            <Border Background="{StaticResource SurfaceBrush}" Padding="20">
+                <ContentControl x:Name="ContentHost"/>
+            </Border>
+        </DockPanel>
+    </Grid>
 </Window>
