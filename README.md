@@ -87,8 +87,10 @@ dotnet run --launch-profile http
 ```
 
 - Web UI: `http://localhost:5137` (use this HTTP URL with the `http` profile)
-- API base URL is configured in `web/appsettings.json` (`Api:BaseUrl`, default `http://localhost:5118`)
+- API base URL is configured in `web/appsettings.json` / `web/appsettings.Production.json` (`Api:BaseUrl`, default `http://localhost:5118`)
 - Sign in: `owner` / `owner123` (Owner dashboard). Cashier/Operator accounts work with role-limited pages.
+
+**Production hosting (e.g. `blocks.neuereatec.org`):** the Blazor Server app calls the API with server-side `HttpClient`, so `Api:BaseUrl` must be reachable **from the web host**, not from the browser. Same-machine API on `http://localhost:5118` is fine; otherwise set env var `Api__BaseUrl` (or edit `appsettings.Production.json`) before publish. GitHub Pages only hosts the static `site/` showcase — it does **not** deploy the Blazor Server dashboard; redeploy `web/` (and `backend/` if needed) on the neuereatec host after pulling fixes.
 
 If port 5137 or 5118 is already in use, stop the old `BlocksPlant.Web` / `BlocksPlant.Api` process (or change the profile ports) before starting again.
 

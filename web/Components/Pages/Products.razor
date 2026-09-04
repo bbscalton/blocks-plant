@@ -51,10 +51,10 @@
                             <td>@p.SizeInches"</td>
                             <td>@p.Quantity</td>
                             <td>
-                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="_prices[p.Id]" />
+                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="p.PricePerBlock" />
                             </td>
                             <td>
-                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="_mins[p.Id]" />
+                                <InputNumber class="form-control form-control-sm input-narrow" @bind-Value="p.MinStock" />
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-primary" @onclick="() => SaveAsync(p)" disabled="@_saving">Save</button>
@@ -69,8 +69,6 @@
 
 @code {
     private List<ProductDto> _items = new();
-    private readonly Dictionary<int, decimal> _prices = new();
-    private readonly Dictionary<int, int> _mins = new();
     private string? _error;
     private string? _message;
     private bool _loading = true;
@@ -81,9 +79,22 @@
     {
         if (!firstRender || _loaded) return;
         _loaded = true;
-        if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
-        if (Auth.IsOwner) await LoadAsync();
-        else { _loading = false; StateHasChanged(); }
+        try
+        {
+            if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+            if (Auth.IsOwner) await LoadAsync();
+            else
+            {
+                _loading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            _loading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task LoadAsync()
@@ -92,14 +103,11 @@
         _error = null;
         try
         {
-            _items = await Api.GetProductsAsync();
-            _prices.Clear();
-            _mins.Clear();
-            foreach (var p in _items)
-            {
-                _prices[p.Id] = p.PricePerBlock ?? 0;
-                _mins[p.Id] = p.MinStock;
-            }
+            var products = await Api.GetProductsAsync();
+            // Normalize null prices so InputNumber always has a non-null decimal to edit.
+            foreach (var p in products)
+                p.PricePerBlock ??= 0;
+            _items = products;
         }
         catch (Exception ex)
         {
@@ -119,7 +127,7 @@
         _message = null;
         try
         {
-            await Api.UpdateProductAsync(p.Id, _prices[p.Id], _mins[p.Id]);
+            await Api.UpdateProductAsync(p.Id, p.PricePerBlock ?? 0, p.MinStock);
             _message = $"Updated {p.Name}.";
             await LoadAsync();
         }
@@ -130,6 +138,7 @@
         finally
         {
             _saving = false;
+            StateHasChanged();
         }
     }
 }

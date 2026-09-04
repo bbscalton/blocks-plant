@@ -1,5 +1,6 @@
 using BlocksPlant.Web.Components;
 using BlocksPlant.Web.Services;
+using Microsoft.AspNetCore.Components.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,11 @@ builder.Services.AddHttpClient<ApiClient>((sp, client) =>
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+if (builder.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("DetailedErrors"))
+{
+    builder.Services.Configure<CircuitOptions>(o => o.DetailedErrors = true);
+}
 
 var app = builder.Build();
 
