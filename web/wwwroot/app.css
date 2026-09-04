@@ -480,9 +480,24 @@ h2 {
     justify-content: center;
     color: #fff;
     overflow: hidden;
+    border-left: 8px solid var(--accent);
     background:
-        linear-gradient(145deg, rgba(224, 112, 32, 0.22) 0%, transparent 45%),
-        linear-gradient(180deg, #141a1e 0%, #1c252b 55%, #243039 100%);
+        linear-gradient(145deg, rgba(224, 112, 32, 0.28) 0%, transparent 45%),
+        linear-gradient(180deg, #0e1418 0%, #141a1e 40%, #1c252b 100%);
+}
+
+.login-brand::before {
+    content: "NEW FLOOR UI · 2026";
+    display: inline-block;
+    align-self: flex-start;
+    margin-bottom: 1.25rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 4px;
+    background: rgba(224, 112, 32, 0.28);
+    color: #ffc89a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
 }
 
 .login-brand::after {

@@ -4,7 +4,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="340"/>
+            <ColumnDefinition Width="360"/>
         </Grid.ColumnDefinitions>
 
         <!-- Line items -->
@@ -51,17 +51,22 @@
             </DockPanel>
         </Border>
 
-        <!-- Checkout rail -->
+        <!-- Checkout rail with hero total -->
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <Border Background="{StaticResource SlateBrush}" CornerRadius="8" Padding="18,16" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="SALE TOTAL" FontSize="11" FontWeight="Bold" Foreground="#8A9AA3"/>
-                        <TextBlock x:Name="GrandTotalText" Text="$0.00"
-                                   FontFamily="{StaticResource DisplayFont}"
-                                   FontSize="36" FontWeight="Bold" Foreground="White" Margin="0,6,0,0"/>
-                        <TextBlock x:Name="LineCountText" Text="0 line items" FontSize="12" Foreground="#A8B6BD" Margin="0,4,0,0"/>
-                    </StackPanel>
+                <Border Background="#FF0E1418" CornerRadius="10" Padding="0" Margin="0,0,0,14" ClipToBounds="True">
+                    <Grid>
+                        <Border Height="6" VerticalAlignment="Top" Background="{StaticResource AccentBrush}"/>
+                        <StackPanel Margin="20,22,20,18">
+                            <TextBlock Text="SALE TOTAL" FontSize="12" FontWeight="Bold"
+                                       Foreground="#FFB8894A"/>
+                            <TextBlock x:Name="GrandTotalText" Text="$0.00"
+                                       FontFamily="{StaticResource DisplayFont}"
+                                       FontSize="48" FontWeight="Bold" Foreground="White" Margin="0,8,0,0"/>
+                            <TextBlock x:Name="LineCountText" Text="0 line items" FontSize="13"
+                                       Foreground="#A8B6BD" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
                 <Border Style="{StaticResource PanelCard}" Margin="0,0,0,12">
@@ -98,7 +103,7 @@
                     </StackPanel>
                 </Border>
 
-                <Button Content="Complete sale" Height="48" FontSize="15"
+                <Button Content="Complete sale" Height="52" FontSize="16"
                         Style="{StaticResource PrimaryButton}"
                         Click="CompleteSale_Click"/>
                 <Button Content="Clear ticket" Margin="0,8,0,0" Click="Clear_Click"/>
