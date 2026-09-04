@@ -4,7 +4,17 @@ Concrete blocks plant POS and operations system — Phase 1 (API) + Phase 2 (Win
 
 ### Demo on GitHub Pages
 
-A **static product showcase** lives in `site/` and is published with GitHub Actions (`.github/workflows/pages.yml`). It explains what Blocks Plant does for plant owners and staff; it does **not** run the API, Windows POS, Blazor dashboard, or Android app.
+A **static product showcase** lives in `site/` and is published with GitHub Actions (`.github/workflows/pages.yml`). It explains what Blocks Plant does for plant owners and staff.
+
+**Try the live app (hosted web dashboard):**
+
+- https://blocks.neuereatec.org/
+
+That URL is a demo/live environment for people interested in the product. Sign in with the seeded accounts below (for example `owner` / `owner123`). The GitHub Pages site links to it as the primary “try it” CTA; Windows POS and Android still run from a local clone.
+
+**Showcase site:**
+
+- https://bbscalton.github.io/blocks-plant/
 
 **Enable Pages (once per repo):**
 
@@ -16,7 +26,7 @@ A **static product showcase** lives in `site/` and is published with GitHub Acti
 
    (Replace `<org-or-user>` and `blocks-plant` if your GitHub owner or repo name differs.)
 
-**Full system still runs locally** — start the API, then desktop / web / Android as below. Use the Pages site to brief stakeholders; use local runs to evaluate real POS, production, materials, and roles.
+**Full system can also run locally** — start the API, then desktop / web / Android as below. Use the live URL to try the web app quickly; use local runs for POS, Android, or a private stack.
 
 ### Solution layout
 

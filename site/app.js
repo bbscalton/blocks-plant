@@ -89,9 +89,8 @@
     if (repoLink) repoLink.href = repoUrl;
     if (readmeLink) readmeLink.href = repoUrl + "#readme";
   } else {
-    // Local file / preview: relative README is not available; leave # or guess common path
-    if (repoLink) repoLink.href = "../README.md";
-    if (readmeLink) readmeLink.href = "../README.md";
+    if (repoLink) repoLink.href = "https://github.com/bbscalton/blocks-plant";
+    if (readmeLink) readmeLink.href = "https://github.com/bbscalton/blocks-plant#readme";
   }
 
   updatePosTotal();

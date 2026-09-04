@@ -22,7 +22,7 @@
       <a href="#roles">Roles</a>
       <a href="#try">Try it</a>
     </nav>
-    <a class="btn btn-small" href="#try">Run locally</a>
+    <a class="btn btn-small" href="https://blocks.neuereatec.org/" rel="noopener" target="_blank">Try the live app</a>
   </header>
 
   <main id="top">
@@ -35,12 +35,12 @@
           raw materials, production, cash &amp; credit sales, and who still owes you.
         </p>
         <div class="cta-row">
-          <a class="btn" href="#problems">See what it solves</a>
-          <a class="btn btn-ghost" href="#try">Try it on your machine</a>
+          <a class="btn" href="https://blocks.neuereatec.org/" rel="noopener" target="_blank">Try the live app</a>
+          <a class="btn btn-ghost" href="#problems">See what it solves</a>
         </div>
         <p class="hero-note">
-          This page is a product showcase. The live API, Windows POS, web dashboard,
-          and Android floor app run locally from the repository — not on GitHub Pages.
+          A demo/live web environment is available for people interested in the product.
+          This GitHub Pages site is the showcase; the live app is hosted separately.
         </p>
       </div>
       <aside class="hero-panel" aria-label="Sample plant snapshot">
@@ -206,33 +206,47 @@
 
     <section id="try" class="section">
       <div class="section-head">
-        <h2>Try Blocks Plant on your machine</h2>
+        <h2>Try the live app</h2>
         <p>
-          GitHub Pages hosts this showcase only. To evaluate the real POS, dashboard, and floor app,
-          clone the repo and run the API plus the clients you care about.
+          Open the hosted web dashboard — a demo/live environment for people interested in
+          Blocks Plant. Explore stock, production, and owner views without installing anything.
         </p>
       </div>
-      <ol class="try-steps">
-        <li>Start the API: <code>cd backend</code> then <code>dotnet run --launch-profile http</code></li>
-        <li>Windows POS: <code>cd desktop</code> then <code>dotnet run</code></li>
-        <li>Web dashboard: <code>cd web</code> then <code>dotnet run --launch-profile http</code></li>
-        <li>Android: open <code>android/</code> in Android Studio (or build the debug APK)</li>
-      </ol>
+      <div class="cta-row">
+        <a class="btn" href="https://blocks.neuereatec.org/" rel="noopener" target="_blank">Try the live app</a>
+        <a class="btn btn-ghost" id="repo-link" href="https://github.com/bbscalton/blocks-plant" rel="noopener">Open the repository</a>
+      </div>
       <p class="try-accounts">
-        Seeded sign-in: <code>owner</code> / <code>owner123</code>,
+        Seeded sign-in (live demo and local): <code>owner</code> / <code>owner123</code>,
         <code>cashier</code> / <code>cashier123</code>,
         <code>operator</code> / <code>operator123</code>
       </p>
-      <div class="cta-row">
-        <a class="btn" id="repo-link" href="https://github.com/" rel="noopener">Open the repository</a>
-        <a class="btn btn-ghost" href="https://github.com/" id="readme-link" rel="noopener">Full setup in README</a>
+
+      <div class="try-local">
+        <h3>Prefer to run it yourself?</h3>
+        <p>
+          Clone the repo for the Windows POS, Android floor app, or a full local stack.
+          GitHub Pages hosts this showcase only; the live URL above is the hosted web app.
+        </p>
+        <ol class="try-steps">
+          <li>Start the API: <code>cd backend</code> then <code>dotnet run --launch-profile http</code></li>
+          <li>Windows POS: <code>cd desktop</code> then <code>dotnet run</code></li>
+          <li>Web dashboard: <code>cd web</code> then <code>dotnet run --launch-profile http</code></li>
+          <li>Android: open <code>android/</code> in Android Studio (or build the debug APK)</li>
+        </ol>
+        <div class="cta-row">
+          <a class="btn btn-ghost" href="https://github.com/bbscalton/blocks-plant" id="readme-link" rel="noopener">Full setup in README</a>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="foot">
     <p><strong>Blocks Plant</strong> — plant operations software for concrete block yards.</p>
-    <p class="foot-note">Static product page · full system runs from the repository locally.</p>
+    <p class="foot-note">
+      Showcase on GitHub Pages ·
+      <a href="https://blocks.neuereatec.org/" rel="noopener" target="_blank">try the live app</a>
+    </p>
   </footer>
 
   <script src="./app.js"></script>
