@@ -38,6 +38,8 @@ blocks-plant/
   web/              Blazor Server owner dashboard (.NET 8)
   android/          Kotlin / Jetpack Compose plant-floor app
   site/             Static GitHub Pages showcase (HTML/CSS/JS)
+  installer/        Inno Setup script (blocks-plant.iss)
+  scripts/          publish-installer.ps1, Install.ps1
   .github/workflows/pages.yml
   README.md
 ```
@@ -258,6 +260,54 @@ dotnet build BlocksPlant.sln
 cd android
 .\gradlew.bat assembleDebug
 ```
+
+### Windows installer (Setup.exe)
+
+Install Blocks Plant on another Windows PC without the .NET SDK. The package is **self-contained** (`win-x64`) and includes:
+
+| Component | Installed path |
+|-----------|----------------|
+| Desktop POS | `C:\Program Files\BlocksPlant\Desktop\BlocksPlant.Desktop.exe` |
+| API backend | `C:\Program Files\BlocksPlant\backend\BlocksPlant.Api.exe` |
+| Web dashboard | `C:\Program Files\BlocksPlant\web\BlocksPlant.Web.exe` |
+
+Desktop auto-starts the published API (port **5118**) and web dashboard (port **5137**) from the sibling folders. Start Menu / Desktop shortcuts are named **Blocks Plant**.
+
+#### Build the installer (on a build machine)
+
+Prerequisites: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), and optionally [Inno Setup 6](https://jrsoftware.org/isdl.php) (`choco install innosetup -y`) for `Setup.exe`.
+
+```powershell
+.\scripts\publish-installer.ps1
+```
+
+Outputs under `dist/` (gitignored):
+
+- `dist\BlocksPlant-Setup.exe` — Inno Setup installer (if `ISCC` is installed)
+- `dist\BlocksPlant-win-x64.zip` — portable zip + `Install.ps1`
+- `dist\publish\` — raw published folders
+
+#### Install on another PC
+
+**Option A — Setup.exe:** run `BlocksPlant-Setup.exe` as Administrator, follow the wizard, then launch **Blocks Plant** from the Start Menu.
+
+**Option B — Zip:** extract `BlocksPlant-win-x64.zip`, open an **elevated** PowerShell in the extract folder, then:
+
+```powershell
+.\Install.ps1
+```
+
+No separate .NET runtime or Visual C++ redistributable is required for the self-contained build.
+
+#### First run
+
+1. Start **Blocks Plant** (Desktop). It starts API + web if ports are free.
+2. Sign in as **owner** / **owner123** (change the password after first login).
+3. Web dashboard: `http://localhost:5137` · API: `http://localhost:5118`
+
+**Windows Firewall:** local use on the same PC usually needs no change. To reach the API from phones/other PCs on the LAN, allow inbound **TCP 5118** (and **5137** if you expose the web UI).
+
+SQLite DB and uploaded logos live under the installed `backend\` folder and are kept across app updates; uninstall does not wipe them by default.
 
 ### Caveats
 

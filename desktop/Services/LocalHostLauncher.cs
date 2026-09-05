@@ -6,12 +6,19 @@ using System.Net.Sockets;
 namespace BlocksPlant.Desktop.Services;
 
 /// <summary>
-/// Starts local API / Blazor web hosts when the Desktop POS launches from a repo checkout.
+/// Starts local API / Blazor web hosts when the Desktop POS launches.
+/// Prefers published sibling exes (installed layout under Program Files);
+/// falls back to <c>dotnet run</c> only when developing from the repo.
 /// Does not kill started processes on Desktop exit (other clients may still need them).
 /// </summary>
 public sealed class LocalHostLauncher
 {
     public static LocalHostLauncher Instance { get; } = new();
+
+    private const string ApiExeName = "BlocksPlant.Api.exe";
+    private const string WebExeName = "BlocksPlant.Web.exe";
+    private const string DefaultApiUrl = "http://localhost:5118";
+    private const string DefaultWebUrl = "http://localhost:5137";
 
     private static readonly HttpClient ProbeHttp = new()
     {
@@ -62,46 +69,58 @@ public sealed class LocalHostLauncher
     public async Task EnsureApiAsync(AppConfig config, CancellationToken ct = default)
     {
         var baseUrl = string.IsNullOrWhiteSpace(config.ApiBaseUrl)
-            ? "http://localhost:5118"
+            ? DefaultApiUrl
             : config.ApiBaseUrl.TrimEnd('/');
 
         if (await IsServiceUpAsync(baseUrl, ct))
             return;
 
-        var projectDir = FindSiblingProjectDir("backend", "BlocksPlant.Api.csproj");
-        if (projectDir is null)
+        if (TryStartPublishedExe("backend", ApiExeName, baseUrl))
         {
-            LastError = "API is not running and the backend project was not found near this exe.";
+            if (!await WaitUntilUpAsync(baseUrl, TimeSpan.FromSeconds(90), ct))
+                LastError = $"API did not become ready at {baseUrl}. Start BlocksPlant.Api manually from the backend folder.";
             return;
         }
 
-        StartDotnetHost(projectDir, "BlocksPlant.Api.csproj");
-        var ok = await WaitUntilUpAsync(baseUrl, TimeSpan.FromSeconds(90), ct);
-        if (!ok)
+        var projectDir = FindSiblingProjectDir("backend", "BlocksPlant.Api.csproj");
+        if (projectDir is null)
+        {
+            LastError = "API is not running and neither a published backend exe nor the backend project was found near this app.";
+            return;
+        }
+
+        StartDotnetHost(projectDir, "BlocksPlant.Api.csproj", DefaultApiUrl);
+        if (!await WaitUntilUpAsync(baseUrl, TimeSpan.FromSeconds(90), ct))
             LastError = $"API did not become ready at {baseUrl}. Start it manually from the backend folder.";
     }
 
     public async Task EnsureWebAsync(AppConfig config, CancellationToken ct = default)
     {
         var baseUrl = string.IsNullOrWhiteSpace(config.WebUrl)
-            ? "http://localhost:5137"
+            ? DefaultWebUrl
             : config.WebUrl.TrimEnd('/');
 
         if (await IsServiceUpAsync(baseUrl, ct))
             return;
+
+        if (TryStartPublishedExe("web", WebExeName, baseUrl))
+        {
+            if (!await WaitUntilUpAsync(baseUrl, TimeSpan.FromSeconds(90), ct) && string.IsNullOrEmpty(LastError))
+                LastError = $"Web did not become ready at {baseUrl}.";
+            return;
+        }
 
         var projectDir = FindSiblingProjectDir("web", "BlocksPlant.Web.csproj");
         if (projectDir is null)
         {
             // Web is optional for POS login — soft failure
             if (string.IsNullOrEmpty(LastError))
-                LastError = "Web dashboard is not running and the web project was not found.";
+                LastError = "Web dashboard is not running and neither a published web exe nor the web project was found.";
             return;
         }
 
-        StartDotnetHost(projectDir, "BlocksPlant.Web.csproj");
-        var ok = await WaitUntilUpAsync(baseUrl, TimeSpan.FromSeconds(90), ct);
-        if (!ok && string.IsNullOrEmpty(LastError))
+        StartDotnetHost(projectDir, "BlocksPlant.Web.csproj", DefaultWebUrl);
+        if (!await WaitUntilUpAsync(baseUrl, TimeSpan.FromSeconds(90), ct) && string.IsNullOrEmpty(LastError))
             LastError = $"Web did not become ready at {baseUrl}.";
     }
 
@@ -157,7 +176,39 @@ public sealed class LocalHostLauncher
         return false;
     }
 
-    private void StartDotnetHost(string projectDir, string csprojName)
+    /// <summary>
+    /// Start a self-contained published exe under sibling <paramref name="folderName"/>
+    /// (installed layout: Program Files\BlocksPlant\Desktop\ + ..\backend\ + ..\web\).
+    /// </summary>
+    private bool TryStartPublishedExe(string folderName, string exeName, string urls)
+    {
+        var exePath = FindSiblingPublishedExe(folderName, exeName);
+        if (exePath is null)
+            return false;
+
+        var workDir = Path.GetDirectoryName(exePath)!;
+        var psi = new ProcessStartInfo
+        {
+            FileName = exePath,
+            Arguments = $"--urls {urls}",
+            WorkingDirectory = workDir,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WindowStyle = ProcessWindowStyle.Hidden
+        };
+        psi.Environment["ASPNETCORE_URLS"] = urls;
+        psi.Environment["ASPNETCORE_ENVIRONMENT"] = "Production";
+
+        var process = Process.Start(psi);
+        if (process is null)
+            return false;
+
+        lock (_lock)
+            _startedPids.Add(process.Id);
+        return true;
+    }
+
+    private void StartDotnetHost(string projectDir, string csprojName, string urls)
     {
         var csproj = Path.Combine(projectDir, csprojName);
 
@@ -182,7 +233,7 @@ public sealed class LocalHostLauncher
 
         if (process is null)
         {
-            var fallback = BuildExeStartInfo(projectDir, csprojName)
+            var fallback = BuildDevExeStartInfo(projectDir, csprojName, urls)
                            ?? throw new InvalidOperationException($"Failed to start process for {csprojName}.");
             process = Process.Start(fallback)
                       ?? throw new InvalidOperationException($"Failed to start process for {csprojName}.");
@@ -192,7 +243,7 @@ public sealed class LocalHostLauncher
             _startedPids.Add(process.Id);
     }
 
-    private static ProcessStartInfo? BuildExeStartInfo(string projectDir, string csprojName)
+    private static ProcessStartInfo? BuildDevExeStartInfo(string projectDir, string csprojName, string urls)
     {
         var assemblyName = Path.GetFileNameWithoutExtension(csprojName);
         var candidates = new[]
@@ -212,12 +263,45 @@ public sealed class LocalHostLauncher
             CreateNoWindow = true,
             WindowStyle = ProcessWindowStyle.Hidden
         };
-        if (csprojName.Contains("Api", StringComparison.OrdinalIgnoreCase))
-            psi.Environment["ASPNETCORE_URLS"] = "http://localhost:5118";
-        else
-            psi.Environment["ASPNETCORE_URLS"] = "http://localhost:5137";
+        psi.Environment["ASPNETCORE_URLS"] = urls;
         psi.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
         return psi;
+    }
+
+    /// <summary>
+    /// Resolve published sibling exe: ..\{folder}\{exe} from Desktop base dir,
+    /// or walk up looking for an install/repo root that contains the folder.
+    /// </summary>
+    public static string? FindSiblingPublishedExe(string folderName, string exeName)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            // Direct sibling: ...\Desktop\ -> ...\backend\BlocksPlant.Api.exe
+            if (dir.Parent is not null)
+            {
+                var sibling = Path.Combine(dir.Parent.FullName, folderName, exeName);
+                if (File.Exists(sibling))
+                    return sibling;
+            }
+
+            // Install / publish root containing Desktop + backend + web
+            var underRoot = Path.Combine(dir.FullName, folderName, exeName);
+            if (File.Exists(underRoot))
+                return underRoot;
+
+            // Repo-style: walking from ...\desktop\bin\... up to repo root
+            if (dir.Name.Equals("desktop", StringComparison.OrdinalIgnoreCase) && dir.Parent is not null)
+            {
+                var candidate = Path.Combine(dir.Parent.FullName, folderName, exeName);
+                if (File.Exists(candidate))
+                    return candidate;
+            }
+
+            dir = dir.Parent;
+        }
+
+        return null;
     }
 
     /// <summary>

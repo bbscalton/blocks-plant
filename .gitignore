@@ -58,3 +58,11 @@ android/build-errors.txt
 backend/App_Data/logos/*
 !backend/App_Data/logos/.gitkeep
 
+# Windows publish / installer output (do not commit binaries)
+dist/
+publish/
+
+# Local verification screenshots / temp
+.tmp-webcheck/
+desktop/*-verify.png
+
