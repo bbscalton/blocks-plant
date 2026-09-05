@@ -65,13 +65,12 @@ SQLite database file `blocksplant.db` is created next to the API on first run (s
 
 ### How to run the desktop POS
 
-1. Start the API first.
-2. Then:
-
 ```powershell
 cd desktop
 dotnet run
 ```
+
+Desktop auto-starts API + web when launched from the repo build (if ports `5118` / `5137` are free). Started hosts keep running after Desktop exits. Disable via `%AppData%\BlocksPlant\config.json` (`AutoStartApi` / `AutoStartWeb`), or set `WebUrl` (default `http://localhost:5137`).
 
 Default API URL in the login screen: `http://localhost:5118`  
 (Change it if you use HTTPS or another host; the value is saved under `%AppData%\BlocksPlant\config.json`.)

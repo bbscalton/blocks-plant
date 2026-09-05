@@ -7,6 +7,15 @@ public class AppConfig
 {
     public string ApiBaseUrl { get; set; } = "http://localhost:5118";
 
+    /// <summary>Blazor owner dashboard URL (default http profile).</summary>
+    public string WebUrl { get; set; } = "http://localhost:5137";
+
+    /// <summary>When true, Desktop starts the API if it is not already listening.</summary>
+    public bool AutoStartApi { get; set; } = true;
+
+    /// <summary>When true, Desktop starts the Blazor web app if it is not already listening.</summary>
+    public bool AutoStartWeb { get; set; } = true;
+
     private static string ConfigPath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BlocksPlant", "config.json");
 
