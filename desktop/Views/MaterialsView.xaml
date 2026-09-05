@@ -17,35 +17,35 @@
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Add / edit material" FontWeight="SemiBold" Margin="0,0,0,10"/>
                     <TextBlock Text="Name" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="NameBox" Margin="0,0,0,8"/>
+                    <TextBox x:Name="NameBox" Height="40" Margin="0,0,0,10"/>
                     <TextBlock Text="Unit (bags, tons, kg, m³…)" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="UnitBox" Margin="0,0,0,8"/>
+                    <TextBox x:Name="UnitBox" Height="40" Margin="0,0,0,10"/>
                     <TextBlock Text="Min stock" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="MinBox" Margin="0,0,0,8" Text="0"/>
+                    <TextBox x:Name="MinBox" Height="40" Margin="0,0,0,10" Text="0"/>
                     <TextBlock Text="Initial qty (new only)" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="QtyBox" Margin="0,0,0,8" Text="0"/>
+                    <TextBox x:Name="QtyBox" Height="40" Margin="0,0,0,10" Text="0"/>
                     <TextBlock Text="Notes" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="NotesBox" Margin="0,0,0,10"/>
+                    <TextBox x:Name="NotesBox" Height="40" Margin="0,0,0,12"/>
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Add new" Height="36" Padding="14,0" Margin="0,0,8,0"
+                        <Button Content="Add new" Height="40" Padding="14,0" Margin="0,0,8,0"
                                 Style="{StaticResource PrimaryButton}" Click="Add_Click"/>
-                        <Button Content="Save selected" Height="36" Padding="14,0" Click="Save_Click"/>
+                        <Button Content="Save selected" Height="40" Padding="14,0" Click="Save_Click"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="Receive / adjust selected" FontWeight="SemiBold" Margin="0,0,0,10"/>
                     <TextBlock Text="Receive quantity (delivery in)" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="ReceiveBox" Margin="0,0,0,8" Text="0"/>
+                    <TextBox x:Name="ReceiveBox" Height="40" Margin="0,0,0,10" Text="0"/>
                     <TextBlock Text="Receive notes" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="ReceiveNotesBox" Margin="0,0,0,8"/>
-                    <Button Content="Receive stock" Height="36" Padding="14,0" Margin="0,0,0,16"
+                    <TextBox x:Name="ReceiveNotesBox" Height="40" Margin="0,0,0,10"/>
+                    <Button Content="Receive stock" Height="40" Padding="14,0" Margin="0,0,0,16"
                             Style="{StaticResource PrimaryButton}" Click="Receive_Click"
                             HorizontalAlignment="Left"/>
                     <TextBlock Text="Adjust delta (+/−)" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="AdjustBox" Margin="0,0,0,8" Text="0"/>
+                    <TextBox x:Name="AdjustBox" Height="40" Margin="0,0,0,10" Text="0"/>
                     <TextBlock Text="Adjust notes" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="AdjustNotesBox" Margin="0,0,0,8"/>
-                    <Button Content="Apply adjust" Height="36" Padding="14,0"
+                    <TextBox x:Name="AdjustNotesBox" Height="40" Margin="0,0,0,10"/>
+                    <Button Content="Apply adjust" Height="40" Padding="14,0"
                             Click="Adjust_Click" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="StatusText" Margin="0,12,0,0" TextWrapping="Wrap"
                                Foreground="{StaticResource MutedBrush}"/>

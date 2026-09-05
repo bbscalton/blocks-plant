@@ -18,6 +18,26 @@ public class Product
     public decimal PricePerBlock { get; set; }
     public int MinStock { get; set; }
     public int Quantity { get; set; }
+    public bool IsActive { get; set; } = true;
+}
+
+/// <summary>Singleton plant / store settings (Id = 1).</summary>
+public class PlantSettings
+{
+    public int Id { get; set; } = 1;
+    public string BusinessName { get; set; } = "Blocks Plant";
+    public string? Address { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? TaxId { get; set; }
+    public string? ReceiptFooter { get; set; } = "Thank you!";
+    public string? LogoFileName { get; set; }
+    public bool ReceiptShowLogo { get; set; } = true;
+    public bool ReceiptShowStoreName { get; set; } = true;
+    public bool ReceiptShowAddress { get; set; } = true;
+    public bool ReceiptShowPhone { get; set; } = true;
+    public bool ReceiptShowCashier { get; set; } = true;
+    public bool ReceiptShowThankYou { get; set; } = true;
 }
 
 public class ProductionEntry

@@ -17,6 +17,41 @@ public class ProductDto
     public decimal? PricePerBlock { get; set; }
     public int MinStock { get; set; }
     public int Quantity { get; set; }
+    public bool IsActive { get; set; } = true;
+}
+
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+}
+
+public class PlantSettingsDto
+{
+    public string BusinessName { get; set; } = "Blocks Plant";
+    public string? Address { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? TaxId { get; set; }
+    public string? ReceiptFooter { get; set; }
+    public bool HasLogo { get; set; }
+    public string? LogoUrl { get; set; }
+    public bool ReceiptShowLogo { get; set; } = true;
+    public bool ReceiptShowStoreName { get; set; } = true;
+    public bool ReceiptShowAddress { get; set; } = true;
+    public bool ReceiptShowPhone { get; set; } = true;
+    public bool ReceiptShowCashier { get; set; } = true;
+    public bool ReceiptShowThankYou { get; set; } = true;
+}
+
+public class DeleteProductResult
+{
+    public bool HardDeleted { get; set; }
+    public bool Deactivated { get; set; }
+    public string Message { get; set; } = string.Empty;
 }
 
 public class StockDto

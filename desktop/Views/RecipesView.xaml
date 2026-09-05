@@ -11,7 +11,7 @@
         <Border DockPanel.Dock="Top" Style="{StaticResource PanelCard}" Padding="12" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Product" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <ComboBox x:Name="ProductCombo" Width="240" DisplayMemberPath="ProductName" Height="36"
+                <ComboBox x:Name="ProductCombo" Width="240" DisplayMemberPath="ProductName" Height="40"
                           SelectionChanged="ProductCombo_SelectionChanged"/>
                 <Button Content="Reload" Margin="12,0,0,0" Click="Reload_Click"/>
             </StackPanel>

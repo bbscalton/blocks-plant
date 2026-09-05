@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -44,11 +45,114 @@ public class ApiClient
         return await ReadAsync<LoginResponse>(response);
     }
 
-    public Task<List<ProductDto>> GetProductsAsync() => GetAsync<List<ProductDto>>("api/products");
+    public Task<List<ProductDto>> GetProductsAsync(bool includeInactive = false) =>
+        GetAsync<List<ProductDto>>($"api/products?includeInactive={includeInactive.ToString().ToLowerInvariant()}");
 
     public async Task UpdateProductAsync(int id, decimal pricePerBlock, int minStock)
     {
         var response = await _http.PutAsJsonAsync($"api/products/{id}", new { pricePerBlock, minStock }, JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task<ProductDto> CreateProductAsync(string name, int sizeInches, decimal pricePerBlock, int minStock, int quantity = 0)
+    {
+        var response = await _http.PostAsJsonAsync("api/products", new { name, sizeInches, pricePerBlock, minStock, quantity }, JsonOptions);
+        return await ReadAsync<ProductDto>(response);
+    }
+
+    public async Task<DeleteProductResult> DeleteProductAsync(int id)
+    {
+        var response = await _http.DeleteAsync($"api/products/{id}");
+        return await ReadAsync<DeleteProductResult>(response);
+    }
+
+    public async Task ActivateProductAsync(int id)
+    {
+        var response = await _http.PostAsync($"api/products/{id}/activate", null);
+        await EnsureSuccessAsync(response);
+    }
+
+    public Task<PlantSettingsDto> GetSettingsAsync() => GetAsync<PlantSettingsDto>("api/settings");
+
+    public async Task<PlantSettingsDto> UpdateSettingsAsync(object body)
+    {
+        var response = await _http.PutAsJsonAsync("api/settings", body, JsonOptions);
+        return await ReadAsync<PlantSettingsDto>(response);
+    }
+
+    public async Task<PlantSettingsDto> UploadLogoAsync(string filePath)
+    {
+        await using var stream = File.OpenRead(filePath);
+        using var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContent, "file", Path.GetFileName(filePath));
+        var response = await _http.PostAsync("api/settings/logo", content);
+        return await ReadAsync<PlantSettingsDto>(response);
+    }
+
+    public async Task ClearLogoAsync()
+    {
+        var response = await _http.DeleteAsync("api/settings/logo");
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task<byte[]?> DownloadLogoBytesAsync()
+    {
+        var response = await _http.GetAsync("api/settings/logo");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        if (!response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadAsByteArrayAsync();
+    }
+
+    public Task<List<UserDto>> GetUsersAsync() => GetAsync<List<UserDto>>("api/users");
+
+    public async Task<UserDto> CreateUserAsync(string username, string password, string fullName, string role)
+    {
+        var response = await _http.PostAsJsonAsync("api/users", new { username, password, fullName, role }, JsonOptions);
+        return await ReadAsync<UserDto>(response);
+    }
+
+    public async Task UpdateUserAsync(int id, string fullName, string role, bool isActive)
+    {
+        var response = await _http.PutAsJsonAsync($"api/users/{id}", new { fullName, role, isActive }, JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task ResetUserPasswordAsync(int id, string newPassword)
+    {
+        var response = await _http.PostAsJsonAsync($"api/users/{id}/reset-password", new { newPassword }, JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task DeactivateUserAsync(int id)
+    {
+        var response = await _http.PostAsync($"api/users/{id}/deactivate", null);
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        var response = await _http.PostAsJsonAsync("api/auth/change-password", new { currentPassword, newPassword }, JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task DownloadBackupAsync(string savePath)
+    {
+        var response = await _http.GetAsync("api/backup");
+        await EnsureSuccessAsync(response);
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        await File.WriteAllBytesAsync(savePath, bytes);
+    }
+
+    public async Task RestoreBackupAsync(string filePath)
+    {
+        await using var stream = File.OpenRead(filePath);
+        using var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContent, "file", Path.GetFileName(filePath));
+        var response = await _http.PostAsync("api/backup/restore", content);
         await EnsureSuccessAsync(response);
     }
 

@@ -21,7 +21,7 @@ public class DashboardController : ControllerBase
         var todayStart = DateTime.UtcNow.Date;
         var todayEnd = todayStart.AddDays(1);
 
-        var stock = await _db.Products.OrderBy(p => p.SizeInches).ToListAsync();
+        var stock = await _db.Products.Where(p => p.IsActive).OrderBy(p => p.SizeInches).ToListAsync();
         var stockDtos = stock.Select(p => new StockDto(
             p.Id, p.Name, p.SizeInches, p.Quantity, p.MinStock, p.Quantity < p.MinStock)).ToList();
 

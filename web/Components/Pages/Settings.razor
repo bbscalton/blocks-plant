@@ -1,0 +1,325 @@
+@page "/settings"
+@using BlocksPlant.Web.Models
+@using BlocksPlant.Web.Services
+@using BlocksPlant.Web.Components.Shared
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@inject ApiClient Api
+@inject AuthService Auth
+@inject IJSRuntime Js
+
+<PageTitle>Settings — Blocks Plant</PageTitle>
+
+<AuthorizeView Roles="Owner">
+    <div class="page-header">
+        <div>
+            <h1>Plant settings</h1>
+            <p class="muted">Store info, logo, receipt fields, and database backup</p>
+        </div>
+        <button class="btn btn-outline" @onclick="LoadAsync" disabled="@_loading">Refresh</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="alert alert-success">@_message</div>
+    }
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (_loading && _settings is null)
+    {
+        <div class="loading-inline"><span class="loading-dot"></span> Loading settings…</div>
+    }
+    else if (_settings is not null)
+    {
+        <div class="settings-grid">
+            <div class="panel">
+                <h2 class="section-title" style="margin-top:0">Store information</h2>
+                <div class="form-group">
+                    <label>Business name</label>
+                    <InputText class="form-control" @bind-Value="_settings.BusinessName" />
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <InputText class="form-control" @bind-Value="_settings.Address" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <InputText class="form-control" @bind-Value="_settings.Phone" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <InputText class="form-control" @bind-Value="_settings.Email" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tax / VAT ID</label>
+                    <InputText class="form-control" @bind-Value="_settings.TaxId" />
+                </div>
+                <div class="form-group">
+                    <label>Receipt footer</label>
+                    <InputText class="form-control" @bind-Value="_settings.ReceiptFooter" />
+                </div>
+
+                <h2 class="section-title">Receipt fields</h2>
+                <label class="check-row"><InputCheckbox @bind-Value="_settings.ReceiptShowLogo" /> Show logo</label>
+                <label class="check-row"><InputCheckbox @bind-Value="_settings.ReceiptShowStoreName" /> Show store name</label>
+                <label class="check-row"><InputCheckbox @bind-Value="_settings.ReceiptShowAddress" /> Show address</label>
+                <label class="check-row"><InputCheckbox @bind-Value="_settings.ReceiptShowPhone" /> Show phone</label>
+                <label class="check-row"><InputCheckbox @bind-Value="_settings.ReceiptShowCashier" /> Show cashier</label>
+                <label class="check-row"><InputCheckbox @bind-Value="_settings.ReceiptShowThankYou" /> Show thank-you / footer</label>
+
+                <div class="btn-row" style="margin-top:1rem">
+                    <button class="btn btn-primary" @onclick="SaveAsync" disabled="@_saving">Save settings</button>
+                </div>
+
+                <h2 class="section-title">Change my password</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Current</label>
+                        <InputText type="password" class="form-control" @bind-Value="_currentPassword" />
+                    </div>
+                    <div class="form-group">
+                        <label>New</label>
+                        <InputText type="password" class="form-control" @bind-Value="_newPassword" />
+                    </div>
+                </div>
+                <button class="btn btn-outline" @onclick="ChangePasswordAsync">Update password</button>
+            </div>
+
+            <div>
+                <div class="panel" style="margin-bottom:1rem">
+                    <h2 class="section-title" style="margin-top:0">Logo</h2>
+                    @if (!string.IsNullOrEmpty(_logoDataUrl))
+                    {
+                        <img src="@_logoDataUrl" alt="Plant logo" class="logo-preview" />
+                    }
+                    else
+                    {
+                        <div class="state-panel" style="margin-bottom:0.75rem">No logo uploaded</div>
+                    }
+                    <InputFile OnChange="OnLogoSelected" accept=".png,.jpg,.jpeg,.gif,.webp" />
+                    <div class="btn-row" style="margin-top:0.75rem">
+                        <button class="btn btn-sm btn-outline" @onclick="ClearLogoAsync" disabled="@(!_settings.HasLogo)">Remove logo</button>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-bottom:1rem">
+                    <h2 class="section-title" style="margin-top:0">Receipt preview</h2>
+                    <pre class="receipt-preview">@BuildPreview()</pre>
+                </div>
+
+                <div class="panel">
+                    <h2 class="section-title" style="margin-top:0">Backup</h2>
+                    <p class="muted">Download a SQLite copy. Restore overwrites all live data (a pre-restore file is kept on the server).</p>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" @onclick="BackupAsync" disabled="@_backingUp">Download backup</button>
+                    </div>
+                    <div style="margin-top:0.75rem">
+                        <label class="muted">Restore from .db</label>
+                        <InputFile OnChange="OnRestoreSelected" accept=".db" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private PlantSettingsDto? _settings;
+    private string? _error;
+    private string? _message;
+    private bool _loading = true;
+    private bool _loaded;
+    private bool _saving;
+    private bool _backingUp;
+    private string? _logoDataUrl;
+    private string _currentPassword = string.Empty;
+    private string _newPassword = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+        try
+        {
+            if (!Auth.IsAuthenticated) await Auth.InitializeAsync();
+            if (Auth.IsOwner) await LoadAsync();
+            else
+            {
+                _loading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _settings = await Api.GetSettingsAsync();
+            _logoDataUrl = _settings.HasLogo ? await Api.GetLogoDataUrlAsync() : null;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_settings is null) return;
+        _saving = true;
+        _error = null;
+        _message = null;
+        try
+        {
+            _settings = await Api.UpdateSettingsAsync(_settings);
+            _message = "Settings saved.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnLogoSelected(InputFileChangeEventArgs e)
+    {
+        _error = null;
+        _message = null;
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(maxAllowedSize: 2_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+            _settings = await Api.UploadLogoAsync(ms, file.Name);
+            _logoDataUrl = await Api.GetLogoDataUrlAsync();
+            _message = "Logo uploaded.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        StateHasChanged();
+    }
+
+    private async Task ClearLogoAsync()
+    {
+        try
+        {
+            await Api.ClearLogoAsync();
+            if (_settings is not null) _settings.HasLogo = false;
+            _logoDataUrl = null;
+            _message = "Logo removed.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        StateHasChanged();
+    }
+
+    private async Task BackupAsync()
+    {
+        _backingUp = true;
+        _error = null;
+        try
+        {
+            var bytes = await Api.DownloadBackupAsync();
+            var name = $"blocksplant-backup-{DateTime.Now:yyyyMMdd-HHmmss}.db";
+            var b64 = Convert.ToBase64String(bytes);
+            await Js.InvokeVoidAsync("blocksPlantDownloadBase64", name, b64, "application/octet-stream");
+            _message = "Backup downloaded.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _backingUp = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnRestoreSelected(InputFileChangeEventArgs e)
+    {
+        _error = null;
+        _message = null;
+        try
+        {
+            var file = e.File;
+            await using var stream = file.OpenReadStream(maxAllowedSize: 100_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+            await Api.RestoreBackupAsync(ms, file.Name);
+            _message = "Database restored. Restart the API if data looks stale.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        StateHasChanged();
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        _error = null;
+        _message = null;
+        try
+        {
+            await Api.ChangePasswordAsync(_currentPassword, _newPassword);
+            _currentPassword = string.Empty;
+            _newPassword = string.Empty;
+            _message = "Password changed.";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        StateHasChanged();
+    }
+
+    private string BuildPreview()
+    {
+        if (_settings is null) return string.Empty;
+        var lines = new List<string>();
+        if (_settings.ReceiptShowLogo && _settings.HasLogo) lines.Add("[logo]");
+        if (_settings.ReceiptShowStoreName) lines.Add((_settings.BusinessName ?? "Blocks Plant").ToUpperInvariant());
+        lines.Add("Sales Receipt");
+        if (_settings.ReceiptShowAddress && !string.IsNullOrWhiteSpace(_settings.Address)) lines.Add(_settings.Address);
+        if (_settings.ReceiptShowPhone && !string.IsNullOrWhiteSpace(_settings.Phone)) lines.Add(_settings.Phone!);
+        if (!string.IsNullOrWhiteSpace(_settings.TaxId)) lines.Add($"Tax ID: {_settings.TaxId}");
+        lines.Add("Sale #: 123");
+        if (_settings.ReceiptShowCashier) lines.Add("Cashier: Sample");
+        lines.Add("--------------------------------");
+        lines.Add("4 Inch Block  x10 @ $2.50");
+        lines.Add("Subtotal $25.00");
+        if (_settings.ReceiptShowThankYou) lines.Add(string.IsNullOrWhiteSpace(_settings.ReceiptFooter) ? "Thank you!" : _settings.ReceiptFooter!);
+        return string.Join('\n', lines);
+    }
+}

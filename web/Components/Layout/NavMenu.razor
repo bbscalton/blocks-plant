@@ -1,12 +1,20 @@
 ﻿@using BlocksPlant.Web.Services
 @inject AuthService Auth
+@inject ApiClient Api
 
 <div class="top-row ps-3 navbar navbar-dark brand-bar">
     <div class="container-fluid brand-row">
         <a class="navbar-brand" href="">
-            <span class="nav-logo" aria-hidden="true"></span>
+            @if (!string.IsNullOrEmpty(_logoDataUrl))
+            {
+                <img src="@_logoDataUrl" alt="" class="nav-logo-img" />
+            }
+            else
+            {
+                <span class="nav-logo" aria-hidden="true"></span>
+            }
             <span class="nav-brand-text">
-                <span class="nav-wordmark">Blocks Plant</span>
+                <span class="nav-wordmark">@_businessName</span>
                 <span class="nav-sub">Owner dashboard</span>
             </span>
         </a>
@@ -70,6 +78,23 @@
             </div>
         }
 
+        @if (Auth.CanManageUsers || Auth.CanManageSettings)
+        {
+            <div class="nav-section">Admin</div>
+            @if (Auth.CanManageUsers)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="users">Users</NavLink>
+                </div>
+            }
+            @if (Auth.CanManageSettings)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="settings">Settings</NavLink>
+                </div>
+            }
+        }
+
         @if (Auth.IsOperator)
         {
             <div class="nav-item px-3">
@@ -78,3 +103,28 @@
         }
     </nav>
 </div>
+
+@code {
+    private string _businessName = "Blocks Plant";
+    private string? _logoDataUrl;
+    private bool _brandLoaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _brandLoaded || !Auth.IsAuthenticated) return;
+        _brandLoaded = true;
+        try
+        {
+            var settings = await Api.GetSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(settings.BusinessName))
+                _businessName = settings.BusinessName;
+            if (settings.HasLogo)
+                _logoDataUrl = await Api.GetLogoDataUrlAsync();
+            StateHasChanged();
+        }
+        catch
+        {
+            // keep defaults
+        }
+    }
+}

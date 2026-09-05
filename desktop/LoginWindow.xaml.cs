@@ -1,4 +1,7 @@
+using System.IO;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using BlocksPlant.Desktop.Services;
 
 namespace BlocksPlant.Desktop;
@@ -14,11 +17,44 @@ public partial class LoginWindow : Window
 
         if (Session.Config.AutoStartApi || Session.Config.AutoStartWeb)
             HostStatusText.Text = "Checking local API / web…";
+
+        Loaded += async (_, _) => await TryLoadBrandingAsync();
     }
 
     public void SetHostStatus(string message)
     {
         HostStatusText.Text = message ?? string.Empty;
+    }
+
+    private async Task TryLoadBrandingAsync()
+    {
+        try
+        {
+            var api = new ApiClient(Session.Config);
+            var settings = await api.GetSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(settings.BusinessName))
+                LoginBrandName.Text = settings.BusinessName.ToUpperInvariant();
+
+            if (!settings.HasLogo) return;
+            var bytes = await api.DownloadLogoBytesAsync();
+            if (bytes is null || bytes.Length == 0) return;
+
+            var bitmap = new BitmapImage();
+            using var ms = new MemoryStream(bytes);
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = ms;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            LoginLogo.Source = bitmap;
+            LoginLogo.Visibility = Visibility.Visible;
+            LoginDefaultMark.Visibility = Visibility.Collapsed;
+            LoginBrandMark.Background = Brushes.Transparent;
+        }
+        catch
+        {
+            // API may not be up yet — keep defaults
+        }
     }
 
     private async void LoginButton_Click(object sender, RoutedEventArgs e)

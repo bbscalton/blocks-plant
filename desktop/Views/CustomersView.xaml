@@ -8,7 +8,7 @@
                 <TextBlock Text="Search, filter debtors, and record payments." Style="{StaticResource PageSubtitle}" Margin="0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <TextBox x:Name="SearchBox" Width="180" Margin="0,0,8,0" Height="36"/>
+                <TextBox x:Name="SearchBox" Width="180" Margin="0,0,8,0" Height="40"/>
                 <Button Content="Search" Margin="0,0,8,0" Click="Search_Click"/>
                 <Button Content="Debtors only" Margin="0,0,8,0" Click="Debtors_Click"/>
                 <Button Content="New customer" Margin="0,0,8,0" Click="New_Click"/>

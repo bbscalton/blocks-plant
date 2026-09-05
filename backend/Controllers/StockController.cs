@@ -18,7 +18,7 @@ public class StockController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<StockDto>>> GetStock()
     {
-        var items = await _db.Products.OrderBy(p => p.SizeInches).ToListAsync();
+        var items = await _db.Products.Where(p => p.IsActive).OrderBy(p => p.SizeInches).ToListAsync();
         return items.Select(p => new StockDto(
             p.Id,
             p.Name,

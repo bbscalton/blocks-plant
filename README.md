@@ -131,7 +131,19 @@ JWT is stored in EncryptedSharedPreferences. Production entries queue in Room wh
 
 - **Operator** — production entry; view finished + raw material quantities; cannot see prices, sales, or balances; cannot edit recipes or receive materials.
 - **Cashier** — POS, customers, payments, sales history, deliveries; can view materials; cannot adjust finished or raw stock / recipes.
-- **Owner** — everything: dashboard, product prices, stock adjust, materials receive/adjust, recipes (BOM), production history, POS, etc.
+- **Owner** — everything: dashboard, product prices, stock adjust, materials receive/adjust, recipes (BOM), production history, POS, **users**, **settings / logo / receipt**, **backup**.
+
+### Owner admin (users, settings, backup, products)
+
+**Users (Owner only)** — Desktop **Users** or Web `/users`: list/create/edit accounts, set role (Owner / Cashier / Operator), reset password, deactivate. The last active Owner cannot be deactivated or demoted. Anyone signed in can change their own password from Settings (desktop) or Settings page (web).
+
+**Settings / logo / receipt (Owner only)** — Desktop **Settings** or Web `/settings`: business name, address, phone, email, tax/VAT ID, receipt footer, and toggles for which receipt fields to show. Upload a logo (stored under API `App_Data/logos`, served at `GET /api/settings/logo`). Logo appears on desktop login/shell and web sidebar; receipts use store fields + logo. Default business name is **Blocks Plant**.
+
+**Backup (Owner only)** — Settings → **Backup now** (desktop SaveFileDialog / web download) hits `GET /api/backup` for a timestamped SQLite `.db` copy. Optional **restore** via `POST /api/backup/restore` overwrites the live DB (a pre-restore copy is kept beside it) — use with caution; restart the API if data looks stale.
+
+**Products deactivate / delete (Owner only)** — Products screen: **Remove** hard-deletes unused products; if the product appears in sales, production, or recipes it is **soft-deactivated** (`IsActive = false`) instead. Reactivate from the same screen. POS / stock lists hide inactive products by default.
+
+**Note:** Live host `blocks.neuereatec.org` needs a redeploy of `web/` + `backend/` to pick up these APIs and pages.
 
 ### Business rules enforced by the API
 
@@ -159,8 +171,24 @@ In `backend/appsettings.json`:
 | Method | Path | Roles |
 |--------|------|-------|
 | POST | /api/auth/login | Anonymous |
-| GET | /api/products | Authenticated (prices hidden for Operator) |
+| POST | /api/auth/change-password | Authenticated |
+| GET | /api/products | Authenticated (prices hidden for Operator; inactive hidden unless `includeInactive=true`) |
+| POST | /api/products | Owner |
 | PUT | /api/products/{id} | Owner |
+| DELETE | /api/products/{id} | Owner (hard delete if unused, else deactivate) |
+| POST | /api/products/{id}/activate | Owner |
+| POST | /api/products/{id}/deactivate | Owner |
+| GET | /api/users | Owner |
+| POST | /api/users | Owner |
+| PUT | /api/users/{id} | Owner |
+| POST | /api/users/{id}/reset-password | Owner |
+| POST | /api/users/{id}/deactivate | Owner |
+| GET | /api/settings | Anonymous (public store branding) |
+| PUT | /api/settings | Owner |
+| POST/DELETE | /api/settings/logo | Owner |
+| GET | /api/settings/logo | Anonymous |
+| GET | /api/backup | Owner (SQLite download) |
+| POST | /api/backup/restore | Owner (dangerous overwrite) |
 | GET | /api/stock | Authenticated |
 | POST | /api/stock/adjust | Owner |
 | GET/POST/PUT | /api/materials | GET: Authenticated; POST/PUT: Owner |
@@ -188,6 +216,8 @@ CORS is enabled for web clients.
 - Sales history, deliveries, owner dashboard / products / stock adjust
 - **Materials** inventory (Owner: receive/adjust/add; Operator/Cashier: read-only)
 - **Recipes** BOM per product (Owner)
+- **Users** management (Owner)
+- **Settings**: store info, logo, receipt fields, backup / restore (Owner)
 
 ### Web dashboard features
 
@@ -196,7 +226,8 @@ CORS is enabled for web clients.
 - Stock view + Owner adjust
 - **Materials** list + Owner receive/adjust/add
 - **Recipes** editor (Owner)
-- Product price / min-stock edit (Owner)
+- Product price / min-stock edit + deactivate / add (Owner)
+- **Users** and **Settings** (logo, receipt, backup) (Owner)
 - Sales history search
 - Customers / debtors + record payment
 - Deliveries pending list + mark delivered

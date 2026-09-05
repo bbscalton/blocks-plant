@@ -54,3 +54,7 @@ android/.idea/
 android/build-out.txt
 android/build-errors.txt
 
+# Uploaded plant logos (keep folder)
+backend/App_Data/logos/*
+!backend/App_Data/logos/.gitkeep
+

@@ -77,9 +77,9 @@
                                          Margin="0,0,16,0" Checked="Fulfillment_Changed"/>
                             <RadioButton x:Name="DeliverRadio" Content="Deliver" Checked="Fulfillment_Changed"/>
                         </StackPanel>
-                        <TextBox x:Name="DeliveryAddressBox" Margin="0,0,0,6" Visibility="Collapsed"
+                        <TextBox x:Name="DeliveryAddressBox" Height="40" Margin="0,0,0,8" Visibility="Collapsed"
                                  ToolTip="Delivery address" Tag="Address"/>
-                        <TextBox x:Name="DeliveryNotesBox" Visibility="Collapsed"
+                        <TextBox x:Name="DeliveryNotesBox" Height="40" Visibility="Collapsed"
                                  ToolTip="Delivery notes"/>
                     </StackPanel>
                 </Border>

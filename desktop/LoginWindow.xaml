@@ -45,15 +45,19 @@
                     </Border>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,28">
-                        <Border Width="52" Height="52" Background="{StaticResource AccentBrush}" CornerRadius="8" Margin="0,0,14,0">
+                        <Border Width="52" Height="52" Background="{StaticResource AccentBrush}" CornerRadius="8" Margin="0,0,14,0"
+                                x:Name="LoginBrandMark">
                             <Grid>
-                                <Border Width="16" Height="9" Background="White" Opacity="0.95" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,10,0,0" CornerRadius="1"/>
-                                <Border Width="16" Height="9" Background="White" Opacity="0.75" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="26,10,0,0" CornerRadius="1"/>
-                                <Border Width="16" Height="9" Background="White" Opacity="0.85" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,24,0,0" CornerRadius="1"/>
+                                <Image x:Name="LoginLogo" Stretch="Uniform" Margin="4" Visibility="Collapsed"/>
+                                <Grid x:Name="LoginDefaultMark">
+                                    <Border Width="16" Height="9" Background="White" Opacity="0.95" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,10,0,0" CornerRadius="1"/>
+                                    <Border Width="16" Height="9" Background="White" Opacity="0.75" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="26,10,0,0" CornerRadius="1"/>
+                                    <Border Width="16" Height="9" Background="White" Opacity="0.85" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,24,0,0" CornerRadius="1"/>
+                                </Grid>
                             </Grid>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="BLOCKS PLANT" FontFamily="{StaticResource DisplayFont}"
+                            <TextBlock x:Name="LoginBrandName" Text="BLOCKS PLANT" FontFamily="{StaticResource DisplayFont}"
                                        FontSize="26" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Text="Manufacturing · Sales · Stock" FontSize="13" Foreground="#9AABB4" Margin="0,3,0,0"/>
                         </StackPanel>

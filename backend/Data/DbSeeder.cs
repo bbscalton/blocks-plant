@@ -10,6 +10,8 @@ public static class DbSeeder
         db.Database.EnsureCreated();
         EnsureProductionClientIdColumn(db);
         EnsureMaterialsSchema(db);
+        EnsureProductIsActiveColumn(db);
+        EnsurePlantSettingsSchema(db);
 
         if (!db.Users.Any())
         {
@@ -67,7 +69,61 @@ public static class DbSeeder
         }
 
         db.SaveChanges();
+        SeedPlantSettings(db);
         SeedMaterialsAndRecipes(db);
+    }
+
+    private static void SeedPlantSettings(AppDbContext db)
+    {
+        if (db.PlantSettings.Any(s => s.Id == 1)) return;
+        db.PlantSettings.Add(new PlantSettings
+        {
+            Id = 1,
+            BusinessName = "Blocks Plant",
+            ReceiptFooter = "Thank you!",
+            ReceiptShowLogo = true,
+            ReceiptShowStoreName = true,
+            ReceiptShowAddress = true,
+            ReceiptShowPhone = true,
+            ReceiptShowCashier = true,
+            ReceiptShowThankYou = true
+        });
+        db.SaveChanges();
+    }
+
+    private static void EnsureProductIsActiveColumn(AppDbContext db)
+    {
+        try
+        {
+            db.Database.ExecuteSqlRaw(
+                "ALTER TABLE Products ADD COLUMN IsActive INTEGER NOT NULL DEFAULT 1");
+        }
+        catch
+        {
+            // Column already exists
+        }
+    }
+
+    private static void EnsurePlantSettingsSchema(AppDbContext db)
+    {
+        db.Database.ExecuteSqlRaw("""
+            CREATE TABLE IF NOT EXISTS "PlantSettings" (
+                "Id" INTEGER NOT NULL CONSTRAINT "PK_PlantSettings" PRIMARY KEY,
+                "BusinessName" TEXT NOT NULL,
+                "Address" TEXT NULL,
+                "Phone" TEXT NULL,
+                "Email" TEXT NULL,
+                "TaxId" TEXT NULL,
+                "ReceiptFooter" TEXT NULL,
+                "LogoFileName" TEXT NULL,
+                "ReceiptShowLogo" INTEGER NOT NULL,
+                "ReceiptShowStoreName" INTEGER NOT NULL,
+                "ReceiptShowAddress" INTEGER NOT NULL,
+                "ReceiptShowPhone" INTEGER NOT NULL,
+                "ReceiptShowCashier" INTEGER NOT NULL,
+                "ReceiptShowThankYou" INTEGER NOT NULL
+            );
+            """);
     }
 
     private static void SeedMaterialsAndRecipes(AppDbContext db)

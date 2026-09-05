@@ -7,9 +7,74 @@ public record LoginRequest(string Username, string Password);
 
 public record LoginResponse(string Token, string Username, string FullName, string Role, int UserId);
 
-public record ProductDto(int Id, string Name, int SizeInches, decimal? PricePerBlock, int MinStock, int Quantity);
+public record ProductDto(
+    int Id,
+    string Name,
+    int SizeInches,
+    decimal? PricePerBlock,
+    int MinStock,
+    int Quantity,
+    bool IsActive = true);
 
 public record UpdateProductRequest(decimal PricePerBlock, int MinStock);
+
+public record CreateProductRequest(
+    [Required] string Name,
+    [Range(1, 48)] int SizeInches,
+    [Range(0, double.MaxValue)] decimal PricePerBlock,
+    [Range(0, int.MaxValue)] int MinStock,
+    [Range(0, int.MaxValue)] int Quantity = 0);
+
+public record DeleteProductResult(bool HardDeleted, bool Deactivated, string Message);
+
+public record UserDto(int Id, string Username, string FullName, string Role, bool IsActive);
+
+public record CreateUserRequest(
+    [Required] string Username,
+    [Required] string Password,
+    [Required] string FullName,
+    [Required] string Role);
+
+public record UpdateUserRequest(
+    [Required] string FullName,
+    [Required] string Role,
+    bool IsActive = true);
+
+public record ResetPasswordRequest([Required] string NewPassword);
+
+public record ChangePasswordRequest(
+    [Required] string CurrentPassword,
+    [Required] string NewPassword);
+
+public record PlantSettingsDto(
+    string BusinessName,
+    string? Address,
+    string? Phone,
+    string? Email,
+    string? TaxId,
+    string? ReceiptFooter,
+    bool HasLogo,
+    string? LogoUrl,
+    bool ReceiptShowLogo,
+    bool ReceiptShowStoreName,
+    bool ReceiptShowAddress,
+    bool ReceiptShowPhone,
+    bool ReceiptShowCashier,
+    bool ReceiptShowThankYou);
+
+public record UpdatePlantSettingsRequest(
+    [Required] string BusinessName,
+    string? Address,
+    string? Phone,
+    string? Email,
+    string? TaxId,
+    string? ReceiptFooter,
+    bool ReceiptShowLogo = true,
+    bool ReceiptShowStoreName = true,
+    bool ReceiptShowAddress = true,
+    bool ReceiptShowPhone = true,
+    bool ReceiptShowCashier = true,
+    bool ReceiptShowThankYou = true);
 
 public record StockDto(int ProductId, string ProductName, int SizeInches, int Quantity, int MinStock, bool IsLow);
 

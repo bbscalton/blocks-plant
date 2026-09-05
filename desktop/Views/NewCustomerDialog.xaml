@@ -7,11 +7,11 @@
     <StackPanel Margin="22">
         <TextBlock Text="New customer" Style="{StaticResource PageTitle}" FontSize="18" Margin="0,0,0,14"/>
         <TextBlock Text="Name" Style="{StaticResource FieldLabel}"/>
-        <TextBox x:Name="NameBox" Margin="0,0,0,10" Height="36"/>
+        <TextBox x:Name="NameBox" Margin="0,0,0,10" Height="40"/>
         <TextBlock Text="Phone" Style="{StaticResource FieldLabel}"/>
-        <TextBox x:Name="PhoneBox" Margin="0,0,0,10" Height="36"/>
+        <TextBox x:Name="PhoneBox" Margin="0,0,0,10" Height="40"/>
         <TextBlock Text="Address" Style="{StaticResource FieldLabel}"/>
-        <TextBox x:Name="AddressBox" Margin="0,0,0,16" Height="36"/>
+        <TextBox x:Name="AddressBox" Margin="0,0,0,16" Height="40"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Cancel" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click"/>
             <Button Content="Save" IsDefault="True" Style="{StaticResource PrimaryButton}" Click="Save_Click"/>

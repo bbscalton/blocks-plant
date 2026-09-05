@@ -20,15 +20,19 @@
                     <Border DockPanel.Dock="Top" Padding="16,22,16,18" BorderBrush="#28FFFFFF" BorderThickness="0,0,0,1">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <Border Width="40" Height="40" Background="{StaticResource AccentBrush}" CornerRadius="7" Margin="0,0,12,0">
+                                <Border Width="40" Height="40" Background="{StaticResource AccentBrush}" CornerRadius="7" Margin="0,0,12,0"
+                                        x:Name="BrandMark">
                                     <Grid>
-                                        <Border Width="12" Height="7" Background="White" Opacity="0.95" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,8,0,0" CornerRadius="1"/>
-                                        <Border Width="12" Height="7" Background="White" Opacity="0.75" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,8,0,0" CornerRadius="1"/>
-                                        <Border Width="12" Height="7" Background="White" Opacity="0.85" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13,18,0,0" CornerRadius="1"/>
+                                        <Image x:Name="SidebarLogo" Stretch="Uniform" Margin="4" Visibility="Collapsed"/>
+                                        <Grid x:Name="DefaultMark">
+                                            <Border Width="12" Height="7" Background="White" Opacity="0.95" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,8,0,0" CornerRadius="1"/>
+                                            <Border Width="12" Height="7" Background="White" Opacity="0.75" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,8,0,0" CornerRadius="1"/>
+                                            <Border Width="12" Height="7" Background="White" Opacity="0.85" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13,18,0,0" CornerRadius="1"/>
+                                        </Grid>
                                     </Grid>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="BLOCKS PLANT" FontFamily="{StaticResource DisplayFont}"
+                                    <TextBlock x:Name="BrandNameLabel" Text="BLOCKS PLANT" FontFamily="{StaticResource DisplayFont}"
                                                FontSize="14" FontWeight="Bold" Foreground="White"/>
                                     <TextBlock Text="Operations shell" FontSize="11" Foreground="#8A9AA3"/>
                                 </StackPanel>

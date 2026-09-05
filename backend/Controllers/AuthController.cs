@@ -32,4 +32,23 @@ public class AuthController : ControllerBase
         var token = _jwt.CreateToken(user);
         return Ok(new LoginResponse(token, user.Username, user.FullName, user.Role.ToString(), user.Id));
     }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userId = User.GetUserId();
+        var user = await _db.Users.FindAsync(userId);
+        if (user is null || !user.IsActive)
+            return Unauthorized(new { message = "User not found." });
+
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword ?? string.Empty, user.PasswordHash))
+            return BadRequest(new { message = "Current password is incorrect." });
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 6)
+            return BadRequest(new { message = "New password must be at least 6 characters." });
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "Password changed." });
+    }
 }

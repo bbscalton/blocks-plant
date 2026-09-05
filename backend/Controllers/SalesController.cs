@@ -57,6 +57,9 @@ public class SalesController : ControllerBase
             if (!products.TryGetValue(lineReq.ProductId, out var product))
                 return NotFound(new { message = $"Product {lineReq.ProductId} not found." });
 
+            if (!product.IsActive)
+                return BadRequest(new { message = $"{product.Name} is inactive and cannot be sold." });
+
             if (product.Quantity < lineReq.Quantity)
                 return BadRequest(new
                 {

@@ -19,7 +19,7 @@ public class RecipesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ProductRecipeDto>>> ListAll()
     {
-        var products = await _db.Products.OrderBy(p => p.SizeInches).ToListAsync();
+        var products = await _db.Products.Where(p => p.IsActive).OrderBy(p => p.SizeInches).ToListAsync();
         var lines = await _db.RecipeLines
             .Include(r => r.RawMaterial)
             .ToListAsync();

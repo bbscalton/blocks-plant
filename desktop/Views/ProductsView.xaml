@@ -4,27 +4,44 @@
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
             <TextBlock Text="Products &amp; prices" Style="{StaticResource PageTitle}"/>
-            <TextBlock Text="Update unit price and minimum stock for each block size." Style="{StaticResource PageSubtitle}" Margin="0"/>
+            <TextBlock Text="Update unit price and minimum stock. Deactivate products that are no longer sold."
+                       Style="{StaticResource PageSubtitle}" Margin="0"/>
+            <CheckBox x:Name="ShowInactiveCheck" Content="Show inactive products" Margin="0,8,0,0"
+                      Checked="Reload_Click" Unchecked="Reload_Click"/>
         </StackPanel>
         <Border DockPanel.Dock="Bottom" Style="{StaticResource PanelCard}" Margin="0,12,0,0" Padding="14">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Price" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBox x:Name="PriceBox" Width="110" Margin="0,0,16,0" Height="36"/>
-                <TextBlock Text="Min stock" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBox x:Name="MinStockBox" Width="90" Margin="0,0,16,0" Height="36"/>
-                <Button Content="Save selected" Style="{StaticResource PrimaryButton}" Click="Save_Click"/>
-                <TextBlock x:Name="StatusText" Margin="16,0,0,0" VerticalAlignment="Center"
-                           Foreground="{StaticResource MutedBrush}"/>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock Text="Price" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox x:Name="PriceBox" Width="110" Margin="0,0,16,0" Height="40"/>
+                    <TextBlock Text="Min stock" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox x:Name="MinStockBox" Width="90" Margin="0,0,16,0" Height="40"/>
+                    <Button Content="Save selected" Style="{StaticResource PrimaryButton}" Click="Save_Click"/>
+                    <Button Content="Deactivate / delete" Height="40" Padding="12,0" Margin="10,0,0,0" Click="Delete_Click"/>
+                    <Button Content="Reactivate" Height="40" Padding="12,0" Margin="8,0,0,0" Click="Activate_Click"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="New:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox x:Name="NewNameBox" Width="140" Height="40" Margin="0,0,8,0" ToolTip="Name"/>
+                    <TextBox x:Name="NewSizeBox" Width="60" Height="40" Margin="0,0,8,0" ToolTip="Size inches" Text="4"/>
+                    <TextBox x:Name="NewPriceBox" Width="80" Height="40" Margin="0,0,8,0" ToolTip="Price" Text="0"/>
+                    <TextBox x:Name="NewMinBox" Width="70" Height="40" Margin="0,0,8,0" ToolTip="Min stock" Text="0"/>
+                    <Button Content="Add product" Height="40" Padding="12,0" Click="Add_Click"/>
+                    <TextBlock x:Name="StatusText" Margin="16,0,0,0" VerticalAlignment="Center"
+                               Foreground="{StaticResource MutedBrush}"/>
+                </StackPanel>
             </StackPanel>
         </Border>
         <Border Style="{StaticResource PanelCard}" Padding="0">
-            <DataGrid x:Name="Grid" SelectionMode="Single" SelectionChanged="Grid_SelectionChanged" BorderThickness="0">
+            <DataGrid x:Name="Grid" SelectionMode="Single" SelectionChanged="Grid_SelectionChanged"
+                      AutoGenerateColumns="False" BorderThickness="0">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="Size" Binding="{Binding SizeInches}" Width="60"/>
                     <DataGridTextColumn Header="Price" Binding="{Binding PricePerBlock, StringFormat=C}" Width="100"/>
                     <DataGridTextColumn Header="Min" Binding="{Binding MinStock}" Width="70"/>
                     <DataGridTextColumn Header="Stock" Binding="{Binding Quantity}" Width="80"/>
+                    <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="70"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

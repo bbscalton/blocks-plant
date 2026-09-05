@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<RawMaterial> RawMaterials => Set<RawMaterial>();
     public DbSet<RecipeLine> RecipeLines => Set<RecipeLine>();
     public DbSet<MaterialTransaction> MaterialTransactions => Set<MaterialTransaction>();
+    public DbSet<PlantSettings> PlantSettings => Set<PlantSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

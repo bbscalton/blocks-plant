@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using BlocksPlant.Desktop.Services;
 using BlocksPlant.Desktop.Views;
 
@@ -17,6 +19,37 @@ public partial class MainWindow : Window
         UserNameLabel.Text = user.FullName;
         UserRoleLabel.Text = user.Role.ToUpperInvariant();
         BuildNavigation(user.Role);
+        Loaded += async (_, _) => await LoadBrandingAsync();
+    }
+
+    private async Task LoadBrandingAsync()
+    {
+        try
+        {
+            var settings = await Session.Api!.GetSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(settings.BusinessName))
+                BrandNameLabel.Text = settings.BusinessName.ToUpperInvariant();
+
+            if (!settings.HasLogo) return;
+            var bytes = await Session.Api.DownloadLogoBytesAsync();
+            if (bytes is null || bytes.Length == 0) return;
+
+            var bitmap = new BitmapImage();
+            using var ms = new MemoryStream(bytes);
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = ms;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            SidebarLogo.Source = bitmap;
+            SidebarLogo.Visibility = Visibility.Visible;
+            DefaultMark.Visibility = Visibility.Collapsed;
+            BrandMark.Background = Brushes.Transparent;
+        }
+        catch
+        {
+            // keep default branding
+        }
     }
 
     private void BuildNavigation(string role)
@@ -73,6 +106,8 @@ public partial class MainWindow : Window
             AddNav("Stock adjust", "Write-offs and corrections", () => ContentHost.Content = new StockAdjustView());
             AddNav("Materials", "Raw inventory", () => ContentHost.Content = new MaterialsView());
             AddNav("Recipes", "BOM per block", () => ContentHost.Content = new RecipesView());
+            AddNav("Users", "Staff accounts and roles", () => ContentHost.Content = new UsersView());
+            AddNav("Settings", "Store, logo, receipt, backup", () => ContentHost.Content = new SettingsView());
         }
 
         if (role is "Operator" or "Cashier")

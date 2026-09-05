@@ -26,6 +26,9 @@ public class AuthService
     public bool CanManageMaterials => IsOwner;
     public bool CanEditRecipes => IsOwner;
     public bool CanViewMaterials => IsAuthenticated;
+    public bool CanManageUsers => IsOwner;
+    public bool CanManageSettings => IsOwner;
+    public bool CanBackup => IsOwner;
 
     public event Action? Changed;
 
