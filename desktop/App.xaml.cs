@@ -20,12 +20,17 @@ public partial class App : Application
         if (!config.AutoStartApi && !config.AutoStartWeb)
             return;
 
+        // StartupUri creates LoginWindow after OnStartup returns — wait briefly so
+        // status updates land on the login form instead of being dropped.
+        for (var i = 0; i < 50 && FindLoginWindow() is null; i++)
+            await Task.Delay(50);
+
         void Report(string message)
         {
             Dispatcher.Invoke(() =>
             {
-                if (MainWindow is LoginWindow login)
-                    login.SetHostStatus(message);
+                var login = FindLoginWindow();
+                login?.SetHostStatus(message);
             });
         }
 
@@ -37,5 +42,22 @@ public partial class App : Application
         {
             Report($"Could not auto-start local hosts: {ex.Message}");
         }
+    }
+
+    private static LoginWindow? FindLoginWindow()
+    {
+        if (Current?.MainWindow is LoginWindow main)
+            return main;
+
+        if (Current?.Windows is null)
+            return null;
+
+        foreach (Window window in Current.Windows)
+        {
+            if (window is LoginWindow login)
+                return login;
+        }
+
+        return null;
     }
 }

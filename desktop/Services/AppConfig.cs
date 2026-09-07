@@ -26,7 +26,10 @@ public class AppConfig
             if (File.Exists(ConfigPath))
             {
                 var json = File.ReadAllText(ConfigPath);
-                return JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                // Parameterless ctor applies property initializers (AutoStart*=true).
+                // Missing JSON keys keep those defaults — do not treat absent bools as false.
+                var loaded = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                return loaded;
             }
         }
         catch

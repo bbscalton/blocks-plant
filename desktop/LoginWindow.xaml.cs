@@ -16,9 +16,22 @@ public partial class LoginWindow : Window
         UsernameBox.Focus();
 
         if (Session.Config.AutoStartApi || Session.Config.AutoStartWeb)
-            HostStatusText.Text = "Checking local API / web…";
+        {
+            HostStatusText.Text = string.IsNullOrWhiteSpace(LocalHostLauncher.Instance.LastStatus)
+                ? "Starting local API / web…"
+                : LocalHostLauncher.Instance.LastStatus;
+        }
 
-        Loaded += async (_, _) => await TryLoadBrandingAsync();
+        Loaded += async (_, _) =>
+        {
+            // Pick up any status that arrived before this window existed.
+            if (!string.IsNullOrWhiteSpace(LocalHostLauncher.Instance.LastStatus))
+                HostStatusText.Text = LocalHostLauncher.Instance.LastStatus!;
+            else if (!string.IsNullOrWhiteSpace(LocalHostLauncher.Instance.LastError))
+                HostStatusText.Text = LocalHostLauncher.Instance.LastError!;
+
+            await TryLoadBrandingAsync();
+        };
     }
 
     public void SetHostStatus(string message)

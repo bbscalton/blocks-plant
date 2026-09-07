@@ -78,7 +78,9 @@
         <Setter Property="Margin" Value="0,0,0,4"/>
     </Style>
 
-    <!-- Shared form fields: horizontal padding only so Height=40 stays vertically centered -->
+    <!-- Shared form fields: Height=40 + horizontal-only padding.
+         PART_ContentHost must Stretch (not VerticalAlignment=Center) so TextBox and
+         PasswordBox measure the same line box; VerticalContentAlignment centers text. -->
     <Style TargetType="TextBox">
         <Setter Property="MinHeight" Value="40"/>
         <Setter Property="Height" Value="40"/>
@@ -101,16 +103,14 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="5"
                             SnapsToDevicePixels="True">
-                        <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="Center"
-                                          HorizontalAlignment="Stretch"
-                                          CanContentScroll="False"
-                                          VerticalScrollBarVisibility="Hidden"
-                                          HorizontalScrollBarVisibility="Hidden"
-                                          Focusable="False"/>
-                        </Grid>
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalAlignment="Stretch"
+                                      CanContentScroll="False"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      Focusable="False"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsKeyboardFocused" Value="True">
@@ -146,16 +146,14 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="5"
                             SnapsToDevicePixels="True">
-                        <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="Center"
-                                          HorizontalAlignment="Stretch"
-                                          CanContentScroll="False"
-                                          VerticalScrollBarVisibility="Hidden"
-                                          HorizontalScrollBarVisibility="Hidden"
-                                          Focusable="False"/>
-                        </Grid>
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalAlignment="Stretch"
+                                      CanContentScroll="False"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      Focusable="False"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsKeyboardFocused" Value="True">
@@ -173,7 +171,7 @@
     <Style TargetType="ComboBox">
         <Setter Property="MinHeight" Value="40"/>
         <Setter Property="Height" Value="40"/>
-        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="Padding" Value="12,0,36,0"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrushKey}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -213,7 +211,7 @@
                                 </ControlTemplate>
                             </ToggleButton.Template>
                         </ToggleButton>
-                        <ContentPresenter Margin="12,0,36,0"
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Left"
                                           IsHitTestVisible="False"
